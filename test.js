@@ -318,10 +318,12 @@ const generate_Code = abstract_code => {
 
 
 
-let example_output_data = [
-    ["const", 'num_zc91Xi3U', [{ type: "div", value: [{ type: "PReLU", value: [{ type: 'input', value: 0 }], multiplier: 1 }, { value: 0.41, multiplier: 1 }, { value: 0.5 }] }]],
-    ["var", 'num_Nq9qdV98', [{ type: "linearFunction", value: [{ value: 0.82, multiplier: 3 }, { type: "Tanh", value: 'num_zc91Xi3U' }] }]],
-    ["return", [{ value: 'num_Nq9qdV98', multiplier: -1 }]]
+const example_output_data = [
+    ["signature", { ancestor: '2ECVyQYjd7QLoa', generation: 6, generation_offset: 2, uuid: 'ItRAwxaIkshSOU' }],
+    ["const", 'num_const_zc91Xi3U', [{ type: "mul", value: [{ type: "sin", value: [{ type: 'input', value: 0 }], multiplier: 1 }, { value: 0.41, multiplier: 1 }, { value: 0.5 }] }]],
+    ["var", 'num_var_Nq9qdV98', [{ type: "linearFunction", value: [{ value: 0.82, multiplier: 0 }, { type: "round", value: 'num_const_zc91Xi3U' }, { type: "sin", value: [{ type: 'input', value: 0 }] }] }]],
+    ["assign", 'num_var_Nq9qdV98', [{ type: "PReLU", value: [{ type: "SoftPlus", value: 'num_var_Nq9qdV98', multiplier: 1 }, { type: "cos", value: 'num_const_zc91Xi3U' }] }]],
+    ["return", [{ type: undefined, value: 'num_var_Nq9qdV98', multiplier: 0, inverted: -1 }]]
     //["return", [{ value: 'ext_sqrt(16)' }]]   // Future long-term gobal function store
 ];
 
