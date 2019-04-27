@@ -35,6 +35,10 @@ const compile_formula = input => {
         output += ((input.multiplier | 0) > 0 || (input.multiplier | 0) < 0) ? `(${input.value} * ${Math.pow(10, input.multiplier | 0)})` : input.value;
     } else
         switch (input.type) {
+            case 'input': {
+                output += `args[${input.value}]`;
+                break;
+            }
 
             case 'bias__1': {
                 output += 1 * Math.pow(10, input.multiplier | 0);
@@ -76,10 +80,10 @@ const compile_formula = input => {
 
 
             case 'linearFunction': {
-                let k = compile_formula(input.value[0])
-                let x = compile_formula(input.value[1])
-                let n = compile_formula(input.value[2])
-                output = `(${k} * ${x.charAt(0) === '-' ? `(${x})` : x} ${n.charAt(0) === '-' ? `- ${n.substr(1)}` : `+ ${n}`})`
+                let k = compile_formula(input.value[0] || 1)
+                let x = compile_formula(input.value[1] || 1)
+                let n = compile_formula(input.value[2] || 0)
+                output = `(${k} * ${x.charAt(0) === '-' ? `(${x})` : x} ${n === '0' || n.length === 0 ? '' : (n.charAt(0) === '-' ? `- ${n.substr(1)}` : `+ ${n}`)})`
                 break;
             }
 
@@ -159,8 +163,8 @@ const generate_Code = abstract_code => {
 
 
 let example_output_data = [
-    ["const", 'num_zc91Xi3U', [{ type: "div", value: [{ type: "PReLU", value: 'arg[0]', multiplier: 1 }, { value: 0.41, multiplier: 1 }, { value: 0.5 }] }]],
-    ["var", 'num_Nq9qdV98', [{ type: "linearFunction", value: [{ value: 0.82, multiplier: 3 }, { type: "Tanh", value: 'num_zc91Xi3U' }, { value: -0.26 }] }]],
+    ["const", 'num_zc91Xi3U', [{ type: "div", value: [{ type: "PReLU", value: [{ type: 'input', value: 0 }], multiplier: 1 }, { value: 0.41, multiplier: 1 }, { value: 0.5 }] }]],
+    ["var", 'num_Nq9qdV98', [{ type: "linearFunction", value: [{ value: 0.82, multiplier: 3 }, { type: "Tanh", value: 'num_zc91Xi3U' }] }]],
     ["return", [{ value: 'num_Nq9qdV98', multiplier: -1 }]]
     //["return", [{ value: 'ext_sqrt(16)' }]]   // Future long-term gobal function store
 ];
@@ -211,7 +215,8 @@ const test = () => {
     let targetFile = `./gen/${sim_dir}/${randomFilename}.js`
     let generatedCodeLines = generate_Code(example_output_data);
 
-    generatedCodeLines.unshift(`module.exports = exports = (arg) => {`);
+    generatedCodeLines.unshift(`\tconst args = Array.isArray(arg_in) ? arg_in : [arg_in]; // Function input is always an array`);
+    generatedCodeLines.unshift(`module.exports = exports = (arg_in) => {`);
     //generatedCodeLines.unshift(`const ext_sqrt = require('${BRAIN_folder}/squareRoot_inMemory')`); // Future long-term gobal function store
     generatedCodeLines.push('};\n')
     let generatedCode = generatedCodeLines.join('\n');
