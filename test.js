@@ -82,6 +82,43 @@ const compile_formula = input => {
                 break;
             }
 
+
+            // MATH CONSTANTS with optional multiplier and sign inversion
+            case 'euler': {
+                output += (Math.E * Math.pow(10, input.multiplier | 0)) + inverted;
+                break;
+            }
+            case 'pi': {
+                output += (Math.PI * Math.pow(10, input.multiplier | 0)) + inverted;
+                break;
+            }
+            case 'sqrt2': {
+                output += (Math.SQRT2 * Math.pow(10, input.multiplier | 0)) + inverted;
+                break;
+            }
+            case 'sqrt1_2': {
+                output += (Math.SQRT1_2 * Math.pow(10, input.multiplier | 0)) + inverted;
+                break;
+            }
+            case 'ln2': {
+                output += (Math.LN2 * Math.pow(10, input.multiplier | 0)) + inverted;
+                break;
+            }
+            case 'ln10': {
+                output += (Math.LN10 * Math.pow(10, input.multiplier | 0)) + inverted;
+                break;
+            }
+            case 'log2e': {
+                output += (Math.LOG2E * Math.pow(10, input.multiplier | 0)) + inverted;
+                break;
+            }
+            case 'log10e': {
+                output += (Math.LOG10E * Math.pow(10, input.multiplier | 0)) + inverted;
+                break;
+            }
+
+
+            // Numeric operations for arrays
             case 'sum': {
                 let sum_stringArray = [];
                 input.value.forEach(val => sum_stringArray.push(compile_formula(val)))
