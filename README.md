@@ -40,18 +40,18 @@ This sounds farfetched, but here I've tested the basic functions to make this wo
 All in all about 5% finished!
 A long way to go.
 
-File creation: Done!
-Import created file: Done!
-Import raw code without file creation: Done!
-Gene code to JS source code compiler: ~15% done
-Support for numeric data type assignments and manipulation (var, let, const): ~75% done
-Support standard mathematical numeric constants and operations: a lot (including conversion to degrees for angular functions)
-Support to extend numeric manipulation with individual mutation access: multiplication (x = x * 10^a), inversion (x = ax | a={1,-1})
-Support Neural Network transfer function operations: most of them // To act partially as an artificial neural network
-Support for re-assignments on modifiable variable types: yes
+- File creation: Done!
+- Import created file: Done!
+- Import raw code without file creation: Done!
+- Gene code to JS source code compiler: ~15% done
+- Support for numeric data type assignments and manipulation (var, let, const): ~75% done
+- Support standard mathematical numeric constants and operations: a lot (including conversion to degrees for angular functions)
+- Support to extend numeric manipulation with individual mutation access: multiplication (x = x * 10^a), inversion (x = ax | a={1,-1})
+- Support Neural Network transfer function operations: most of them // To act partially as an artificial neural network
+- Support for re-assignments on modifiable variable types: yes
 
-Main GA for Gene code optimisation: not yet implemented.
-Add 100 things not yet implemented down bellow: not yet implemented.
+- Main GA for Gene code optimisation: not yet implemented.
+- Add 100 things not yet implemented down bellow: not yet implemented.
 
 
 ### Overview
@@ -76,7 +76,7 @@ Every 'crossover' will at random times try to import one of the available module
 
 There are a lot of technical details on mathematical mutation of 'formulas' which I have implemented.
 The compiler already processes most of the parameters the code will ever have (for 'formula' values).
-When mutating, a custom algo will be used, where we know which type the randomly selected values are, and their chance for changing the value itself  (0.1 -> 0.2 or 'x1' -> 'x2') will be higher than changing the type the value is (0.1 -> 'x1').
+When mutating, a custom algo will be used, where we know which type the randomly selected values are, and their chance for changing the value itself  (0.1 -> 0.2 or 'x1' -> 'x2') will be higher than changing the type the value (0.1 -> 'x1').
 The same thing goes for the type groups, switching from (neural:ReLU(x) -> neural:PReLU(x,y)) will be higher than changing group type (neural:ReLU(x) -> math:sin(x)).
 This should make finding the right solution to a given problem smoother (probably).
 
