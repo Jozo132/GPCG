@@ -7,7 +7,7 @@ const fs = require('fs');
 const mkdirp = require('mkdirp');
 const requireFromString = require('require-from-string');
 const moment = require('moment');
-const timestamp = (input, format) => { if (input) return format ? moment(input).format(format) : moment(input).format("YYYY-MM-DD HH:mm:ss.SSS"); else return format ? moment().format(format) : moment().format("YYYY-MM-DD HH:mm:ss.SSS"); };
+const timestamp = (input, format) => { if (input) return format ? moment(input).format(format) : moment(input).format("YYYY-MM-DD HH:mm:ss"); else return format ? moment().format(format) : moment().format("YYYY-MM-DD HH:mm:ss"); };
 let console_log = console.log.bind(console);
 console.log = data => { console_log(`[${timestamp(undefined, "YYYY-MM-DD HH:mm:ss.SSS")}]: `, data); };
 
