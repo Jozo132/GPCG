@@ -67,7 +67,7 @@ Gene structure is formatted by the GA in a kind-of standard way (my own way), wh
 Initially the plan is to generate code based on JavaScript (Node.JS) syntax. 
 Because of the structure for the GA, it is certainly possible to compile other programming languages.
 
-The Fitness function for GE will be based on:
+The Fitness function for GA will be based on:
 - Code size (vertical (lines) and horizontal (nested) code size)
 - Code complexity (sum of all operations' type weights)
 - Solution to desired output (error)
