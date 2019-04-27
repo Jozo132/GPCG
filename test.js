@@ -15,6 +15,35 @@ const fe = (o, cb) => Object.keys(o).forEach((k, i) => cb(o[k], k, i))
 const genString = len => { var text = ""; var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; if (len > 0) for (var i = 0; i < len; i++) text += possible.charAt(Math.floor(Math.random() * possible.length)); else for (var i = 0; i < 5; i++) text += possible.charAt(Math.floor(Math.random() * possible.length)); return text; }
 
 
+
+
+const definitions = [
+    {
+        type: 'input',
+        group: 'input',
+        parameters: {},
+        calculate: (input, calback_deeper) => { // No variable or uneven parameters alowed
+            return `args[${input.value}]`;
+        }
+    }, {
+        type: 'bias__1',
+        group: 'constants',
+        parameters: {},
+        calculate: (input, calback_deeper) => { // No variable or uneven parameters alowed
+            return 1 * Math.pow(10, input.multiplier | 0);
+        }
+    }, {
+        type: 'bias__0',
+        group: 'constants',
+        parameters: {},
+        calculate: (input, calback_deeper) => { // No variable or uneven parameters alowed
+            return 0;
+        }
+    }, // Will be added soon
+]
+
+
+
 const compile_formula = input => {
     let output = '';
     const getLoweLayerOfData = x => {
