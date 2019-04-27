@@ -15,32 +15,196 @@ const fe = (o, cb) => Object.keys(o).forEach((k, i) => cb(o[k], k, i))
 const genString = len => { var text = ""; var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; if (len > 0) for (var i = 0; i < len; i++) text += possible.charAt(Math.floor(Math.random() * possible.length)); else for (var i = 0; i < 5; i++) text += possible.charAt(Math.floor(Math.random() * possible.length)); return text; }
 
 
+const isInverted = is => is < 0 || is === true ? '*(-1)' : '';
 
-
-const definitions = [
-    {
+const operators = [
+    /*{
         type: 'input',
         group: 'input',
+        cost: 1,
         parameters: {},
         calculate: (input, calback_deeper) => { // No variable or uneven parameters alowed
-            return `args[${input.value}]`;
+            return `args[${input.value | 0}]`;
+        }
+    },*/
+    {
+        type: 'default',
+        group: 'analog',
+        cost: 1,
+        upgradable: true,
+        parameters: {},
+        calculate: (input, calback_deeper) => {
+            return input.value * Math.pow(10, input.multiplier | 0);
+        },
+        random: () => {
+            return {
+                type: 'default',
+                value: Math.random(),
+                multiplier: Math.round(Math.random() * 4) - 2,
+                inverted: Math.random() > 0.5
+            }
         }
     }, {
         type: 'bias__1',
         group: 'constants',
+        cost: 1,
         parameters: {},
-        calculate: (input, calback_deeper) => { // No variable or uneven parameters alowed
+        calculate: (input, calback_deeper) => {
             return 1 * Math.pow(10, input.multiplier | 0);
+        },
+        random: () => {
+            return {
+                type: 'bias__1',
+                value: 1,
+                multiplier: Math.round(Math.random() * 4) - 2,
+                inverted: false
+            }
         }
     }, {
         type: 'bias__0',
         group: 'constants',
+        cost: 1,
         parameters: {},
-        calculate: (input, calback_deeper) => { // No variable or uneven parameters alowed
+        calculate: (input, calback_deeper) => {
             return 0;
+        },
+        random: () => {
+            return {
+                type: 'bias__0',
+                value: 0,
+                multiplier: 0,
+                inverted: false
+            }
         }
-    }, // Will be added soon
+    }, {
+        type: 'bias_-1',
+        group: 'constants',
+        cost: 1,
+        parameters: {},
+        calculate: (input, calback_deeper) => {
+            return -1 * Math.pow(10, input.multiplier | 0);
+        },
+        random: () => {
+            return {
+                type: 'bias_-1',
+                value: -1,
+                multiplier: Math.round(Math.random() * 4) - 2,
+                inverted: false
+            }
+        }
+    }, {
+        type: 'linearFunction',
+        group: 'linearAlgebra',
+        cost: 3,
+        parameters: {},
+        calculate: (input, calback_deeper) => {
+            let k = calback_deeper(input.value[0] || 1)
+            let x = calback_deeper(input.value[1] || 1)
+            let n = calback_deeper(input.value[2] || 0)
+            return `(${k} * ${x.charAt(0) === '-' ? `(${x})` : x} ${n === '0' || n.length === 0 ? '' : (n.charAt(0) === '-' ? `- ${n.substr(1)}` : `+ ${n}`)})` + isInverted(input.inverted)
+        },
+        random: () => { // NEED TO ADD RANDOM SELECTION OF CHEAP NUMBERS
+            return {
+                type: 'linearFunction',
+                value: [{
+                    type: 'default',
+                    value: 1,
+                    multiplier: Math.round(Math.random() * 4) - 2,
+                    inverted: Math.random() > 0.5
+                }, {
+                    type: 'default',
+                    value: 1,
+                    multiplier: Math.round(Math.random() * 4) - 2,
+                    inverted: Math.random() > 0.5
+                }, {
+                    type: 'default',
+                    value: 1,
+                    multiplier: Math.round(Math.random() * 4) - 2,
+                    inverted: Math.random() > 0.5
+                }],
+                multiplier: Math.round(Math.random() * 4) - 2,
+                inverted: Math.random() > 0.5
+            }
+        }
+    }
 ]
+
+const declarations = [
+    {
+        name: "const",
+        identifier: "num_const_",
+        type: "variable",
+        cost: 1,
+        scope: "local",
+        modify: false
+    },
+    {
+        name: "var",
+        identifier: "num_var_",
+        cost: 1,
+        type: "variable",
+        scope: "local",
+        modify: true
+    },
+    {
+        name: "assign",
+        cost: 1,
+        type: "variable",
+        scope: "local",
+        modify: false
+    }
+]
+
+
+
+
+const ramdomizeGene = money => {
+    const ancestorId = genString(16);
+    var random_code = [];
+    random_code.push(["signature", { ancestor: ancestorId, generation: 1, generation_offset: 0, uuid: ancestorId }])
+    if (typeof money !== 'number') money = 10;
+    let return_price = Math.round(Math.random() * 3);
+
+
+    var declaredVariables = [];
+
+
+    for (var remaining_money = money - return_price, done_buying = false; remaining_money > 0 && !done_buying;) {
+        var row = [];
+        var selected = {};
+
+        if (declaredVariables.length > 0) { // If variables already exist, use option to modify them
+            let options = ["const", "var", "assign"];
+            let x = options[Math.round(Math.random() * 2)];
+            declarations.forEach(decl => { if (decl.name === x) selected = JSON.parse(JSON.stringify(decl)); });
+        } else {
+            let options = ["const", "var"];
+            let x = options[Math.round(Math.random())];
+            declarations.forEach(decl => { if (decl.name === x) selected = JSON.parse(JSON.stringify(decl)); });
+        }
+
+        remaining_money -= selected.cost;
+
+
+        let availableOperations = [];
+        operators.forEach(op => {
+            if (op.cost <= remaining_money) availableOperations.push({ type: op.type, group: op.group, cost: op.cost })
+        })
+
+        let operation = operators[Math.round(Math.random() * (operators.length - 1))]
+
+        // TO DO: randomly nested stuff
+
+        let id = selected.identifier + genString(8);
+
+        row = [selected.name, id]
+        // ["const", 'num_const_ABC', [{ type: "default", value: { value: 0.5 }]]
+        random_code.push(row);
+
+        if (Math.random() > 0.9) done_buying = true;
+    }
+}
+
 
 
 
