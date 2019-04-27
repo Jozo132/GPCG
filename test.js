@@ -246,8 +246,14 @@ const compile_formula = input => {
                 output += `(${getLoweLayerOfData(input)} > 0 ? ${getLoweLayerOfData(input)} : 0)`;
                 break;
             }
+            case 'Leaky ReLU': {
+                output += `(${getLoweLayerOfData(input)} >= 0 ? ${getLoweLayerOfData(input)} : 0.01 * ${getLoweLayerOfData(input)})` + inverted;
+                break;
+            }
             case 'PReLU': {
-                output += `(${getLoweLayerOfData(input)} > 0 ? ${getLoweLayerOfData(input)} : 0.01 * ${getLoweLayerOfData(input)})`;
+                let x = compile_formula(input.value[0] || 0);
+                let a = compile_formula(input.value[1] || 0.01);
+                output += `(${x} >= 0 ? ${x} : ${a} * ${x})` + inverted;
                 break;
             }
             case 'Sigmoid': {
