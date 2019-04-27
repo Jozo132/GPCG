@@ -2,59 +2,117 @@
 "use strict";
 
 var colors = require('colors');
+//const BRAIN_folder = `C:/brain`;  // Future long-term gobal function store
 const fs = require('fs');
 const mkdirp = require('mkdirp');
 const requireFromString = require('require-from-string');
+const moment = require('moment');
+const timestamp = (input, format) => { if (input) return format ? moment(input).format(format) : moment(input).format("YYYY-MM-DD HH:mm:ss.SSS"); else return format ? moment().format(format) : moment().format("YYYY-MM-DD HH:mm:ss.SSS"); };
+let console_log = console.log.bind(console);
+console.log = data => { console_log(`[${timestamp(undefined, "YYYY-MM-DD HH:mm:ss.SSS")}]: `, data); };
+
 const fe = (o, cb) => Object.keys(o).forEach((k, i) => cb(o[k], k, i))
 const genString = len => { var text = ""; var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; if (len > 0) for (var i = 0; i < len; i++) text += possible.charAt(Math.floor(Math.random() * possible.length)); else for (var i = 0; i < 5; i++) text += possible.charAt(Math.floor(Math.random() * possible.length)); return text; }
-const sim_dir = 'sim_' + genString(10);
-const exportedModule = code => `module.exports = exports = () => {\n${code}\n};\n`
 
 
-const value_types = {
-    0: 'default',
-    1: 'link',
-    2: 'bias__1',
-    3: 'bias__0',
-    4: 'bias_-1',
-
-    5: "sum",
-    6: "sub",
-    7: "mul",
-    8: "div",
-    9: "linearFunction",
-    10: "relu"
-}
-
-
-const codeline_type = {
-    10000: "return",
-    1: "declare"
-}
-
-const declaration_type = {
-    0: "const",
-    1: "var"
-}
-
-
-
-const compile_formula = (type, value) => {
-    //if (type !== `default`)
-    //  console.log(`Trying to compile formula for = ${type} :`, value);
+const compile_formula = input => {
     let output = '';
-    switch (type) {
-        case 'default':
-            output += value;
-            break;
-        case 'linearFunction':
-            let k = compile_formula(value_types[value[0].type], value[0].value);
-            let x = compile_formula(value_types[value[1].type], value[1].value)
-            let n = compile_formula(value_types[value[2].type], value[2].value)
-            output = `(${k}*${x.charAt(0) === '-' ? `(${x})` : x}${n.charAt(0) === '-' ? n : `+${n}`})`
-            //output = temp;
-            break;
+    const getLoweLayerOfData = x => {
+        let output_string = ''
+        if (Array.isArray(x.value)) {
+            let stringArray = []
+            x.value.forEach(val => stringArray.push(compile_formula(val)))
+            let combined = stringArray.length > 1 ? `(${stringArray.join(' + ')})` : stringArray.join(' + ');
+            output_string += ((x.multiplier | 0) > 0 || (x.multiplier | 0) < 0) ? `(${combined} * ${Math.pow(10, x.multiplier | 0)})` : combined;
+        } else
+            output_string += ((x.multiplier | 0) > 0 || (x.multiplier | 0) < 0) ? `(${x.value} * ${Math.pow(10, x.multiplier | 0)})` : x.value;
+        return output_string
     }
+
+    if ((typeof input.type === "undefined" || input.type === "default") && typeof input.value === "number")
+        output += input.value * Math.pow(10, input.multiplier | 0)
+    else if ((typeof input.type === "undefined" || input.type === "link") && typeof input.value === "string") {
+        output += ((input.multiplier | 0) > 0 || (input.multiplier | 0) < 0) ? `(${input.value} * ${Math.pow(10, input.multiplier | 0)})` : input.value;
+    } else
+        switch (input.type) {
+
+            case 'bias__1': {
+                output += 1 * Math.pow(10, input.multiplier | 0);
+                break;
+            }
+            case 'bias__0': {
+                output += 0;
+                break;
+            }
+            case 'bias_-1': {
+                output += -1 * Math.pow(10, input.multiplier | 0);
+                break;
+            }
+
+            case 'sum': {
+                let sum_stringArray = [];
+                input.value.forEach(val => sum_stringArray.push(compile_formula(val)))
+                output += `(${sum_stringArray.join(' + ')})`;
+                break;
+            }
+            case 'sub': {
+                let sub_stringArray = [];
+                input.value.forEach(val => sub_stringArray.push(compile_formula(val)))
+                output += `(${sub_stringArray.join(' - ')})`;
+                break;
+            }
+            case 'mul': {
+                let mul_stringArray = [];
+                input.value.forEach(val => mul_stringArray.push(compile_formula(val)))
+                output += `(${mul_stringArray.join(' * ')})`;
+                break;
+            }
+            case 'div': {
+                let div_stringArray = [];
+                input.value.forEach(val => div_stringArray.push(compile_formula(val)))
+                output += `(${div_stringArray.join(' / ')})`;
+                break;
+            }
+
+
+            case 'linearFunction': {
+                let k = compile_formula(input.value[0])
+                let x = compile_formula(input.value[1])
+                let n = compile_formula(input.value[2])
+                output = `(${k} * ${x.charAt(0) === '-' ? `(${x})` : x} ${n.charAt(0) === '-' ? `- ${n.substr(1)}` : `+ ${n}`})`
+                break;
+            }
+
+
+            case 'Step': {
+                output += `(${getLoweLayerOfData(input)} >= 0 ? 1 : 0)`;
+                break;
+            }
+            case 'ReLU': {
+                output += `(${getLoweLayerOfData(input)} > 0 ? ${getLoweLayerOfData(input)} : 0)`;
+                break;
+            }
+            case 'PReLU': {
+                output += `(${getLoweLayerOfData(input)} > 0 ? ${getLoweLayerOfData(input)} : 0.01 * ${getLoweLayerOfData(input)})`;
+                break;
+            }
+            case 'Sigmoid': {
+                output += `(1 / (1 + Math.exp(-1 * ${getLoweLayerOfData(input)})))`;
+                break;
+            }
+            case 'Tanh': {
+                output += `(2 / (1 + Math.exp(-2 * ${getLoweLayerOfData(input)})) - 1)`;
+                break;
+            }
+            case 'ArcTan': {
+                output += `Math.atan(${getLoweLayerOfData(input)})`
+                break;
+            }
+            case 'SoftPlus': {
+                output += `Math.log(1 + Math.exp(${getLoweLayerOfData(input)}))`;
+                break;
+            }
+        }
     return output;
 }
 
@@ -62,77 +120,128 @@ const compile_formula = (type, value) => {
 const compile_line = (codeLineArray, index) => {
     /** @type {string}   */
     let output = ``;
-    //console.log(`Line \t${index} - Trying to compile\n`, codeLineArray)
-    let line_type = codeline_type[codeLineArray[0]];
+    let line_type = codeLineArray[0];
     switch (line_type) {
-        case 'return':
-            output = `return ${codeLineArray[1].join(' + ')};`;
+        case 'return': {
+            let formulas = [];
+            codeLineArray[1].forEach((value_Array) => {
+                formulas.push(compile_formula(value_Array));
+            });
+            let formula = formulas.join(' + ');
+            output = `\treturn ${formula};`;
             break;
-        case 'declare':
-            let X_type = declaration_type[codeLineArray[2]];
+        }
+        case 'const': case 'var': case 'let': {
+            let X_type = line_type;
             let X_key = codeLineArray[1];
             let formulas = [];
-            codeLineArray[3].forEach((value_Array) => {
-                formulas.push(compile_formula(value_types[value_Array.type], value_Array.value));
+            codeLineArray[2].forEach((value_Array) => {
+                formulas.push(compile_formula(value_Array));
             });
             let formula = formulas.join(' + ');
 
-            output = `${X_type} ${X_key} = ${formula};\n`;
+            output = `\t${X_type} ${X_key} = ${formula};`;
             break;
+        }
     }
     return output;
 }
 
 
 const generate_Code = abstract_code => {
-    let compiled_code = ``;
+    let compiled_code = [];
     abstract_code.forEach((row, i) => {
-        compiled_code += compile_line(row, i + 1);
+        compiled_code.push(compile_line(row, i + 1));
     });
-    //console.log(`FINISHED CODE!`)
-    //console.log(compiled_code.black.bgWhite)
     return compiled_code;
 }
 
 
 
-
-
-//console.log(compiled_code.black.bgWhite)
-
 let example_output_data = [
-    [1, 'id_1', 0, [{ type: 9, value: [{ type: 0, value: 0.82 }, { type: 9, value: [{ type: 0, value: 0.41 }, { type: 0, value: -0.99 }, { type: 0, value: 0.01 }] }, { type: 0, value: -0.26 }] }]],          // Code line 1  >  const id_1 = (0.1) * (0.4) + (-0.2); 
-    [10000, ['id_1']]
+    ["const", 'num_zc91Xi3U', [{ type: "div", value: [{ type: "PReLU", value: 'arg[0]', multiplier: 1 }, { value: 0.41, multiplier: 1 }, { value: 0.5 }] }]],
+    ["var", 'num_Nq9qdV98', [{ type: "linearFunction", value: [{ value: 0.82, multiplier: 3 }, { type: "Tanh", value: 'num_zc91Xi3U' }, { value: -0.26 }] }]],
+    ["return", [{ value: 'num_Nq9qdV98', multiplier: -1 }]]
+    //["return", [{ value: 'ext_sqrt(16)' }]]   // Future long-term gobal function store
 ];
 
 
-generate_Code(example_output_data);
+const saveFile = (file, data, callback) => {
+    console.log(`Saving file '${file}' ...`);
+    mkdirp(file.substr(0, file.lastIndexOf("/")), e => {
+        if (e) console.log(e);
+        fs.writeFile(file, data, callback);
+    })
+}
 
+
+const localExecution = (code, callback) => {
+    console.log("Local execution, not saving code.");
+    try {
+        let imported_code = requireFromString(code)  // Import generated module file
+        callback(imported_code);
+    } catch (e) {
+        console.log(`Failed to execute `, e)
+    }
+}
+
+const storeFs_and_execute = (file, code, callback) => {
+    saveFile(file, code, err => {
+        if (err) return console.log(err);
+        console.log("Saved! Now loading and returning the module");
+        try {
+            let imported_code = require(file)  // Import generated module file
+            callback(imported_code)
+        } catch (e) {
+            console.log(`Failed to execute '${file}' `, e)
+        }
+    });
+}
 
 
 const test = () => {
     let randomFilename = genString(24);
+    let sim_dir = `sim_${timestamp(null, "YYYY-MM-DD")}`
+    console.log("########### Starting test ###########\n");
+    console.log(`Executing Gene compiler with the following data:`)
+    let inputRows = [];
+    example_output_data.forEach((row, i) => inputRows.push(JSON.stringify(row) + (i == example_output_data.length - 1 ? '\n' : '')));
+    inputRows.forEach(row => console.log(row.black.bgWhite))
+
     let targetFile = `./gen/${sim_dir}/${randomFilename}.js`
-    let generatedCode = generate_Code(example_output_data); // exportedModule(`console.log("${genString(128)}");`);
+    let generatedCodeLines = generate_Code(example_output_data);
 
-    console.log("The file generated!");
-    console.log(generatedCode.black.bgWhite);
-    //requireFromString(generatedCode)('test');   // Execute string code without storing it on disk
+    generatedCodeLines.unshift(`module.exports = exports = (arg) => {`);
+    //generatedCodeLines.unshift(`const ext_sqrt = require('${BRAIN_folder}/squareRoot_inMemory')`); // Future long-term gobal function store
+    generatedCodeLines.push('};\n')
+    let generatedCode = generatedCodeLines.join('\n');
 
-    mkdirp(`./gen/${sim_dir}`, e => {
-        if (e) console.log(e)
-        fs.writeFile(targetFile, exportedModule(generatedCode), err => {
-            if (err) return console.log(err);
-            console.log("The file was saved! Now executing it ...");
-            try {
-                console.log(require(targetFile)('test'));
-            } catch (e) {
-                console.log(`Failed to execute '${targetFile}'`, e)
-            }
-        });
-    })
+    console.log("Gene compiled! Code ready to be ported into a NodeJS module");
+    console.log(targetFile.black.bgYellow);
+    generatedCodeLines.forEach(row => console.log(row.black.bgWhite));
 
+    let last = 0;
+    localExecution(generatedCode, code => {
+        for (var i = -5; i <= 5; i += 0.5) {
+            let args = [i.toFixed(1)];
+            let returned = code(args);
+            let delta = returned - last;
+            last = returned;
+            console.log(`code(${args}) => ${returned.toFixed(4)}\tdelta ${delta.toFixed(4)}`)
+        }
+    });
 
+    /*
+    storeFs_and_execute(targetFile, generatedCode, code => {
+        for (var i = -5; i < 6; i += 0.5) {
+            let args = [i.toFixed(1)];
+            let returned = code(args).toFixed(4);
+            let delta = returned - last;
+            last = returned;
+            console.log(`code(${args}) => ${returned}\tdelta ${delta}`)
+        }
+    });
+    */
 }
 
 setTimeout(test, 1000);
