@@ -145,6 +145,90 @@ const compile_formula = input => {
             }
 
 
+
+            // MATH FUNCTIONS with sign inversion
+            case 'abs': {
+                output += `Math.abs(${getLoweLayerOfData(input)})` + inverted
+                break;
+            }
+            case 'acos': {
+                output += `(Math.acos(${getLoweLayerOfData(input)}) * 180.0 / Math.PI)` + inverted
+                break;
+            }
+            case 'asin': {
+                output += `(Math.asin(${getLoweLayerOfData(input)}) * 180.0 / Math.PI)` + inverted
+                break;
+            }
+            case 'atan': {
+                output += `(Math.atan(${getLoweLayerOfData(input)}) * 180.0 / Math.PI)` + inverted
+                break;
+            }
+            case 'atan2': {
+                let y = compile_formula(input.value[0] || 1)
+                let x = compile_formula(input.value[1] || 1)
+                output += `(Math.atan2(${y}, ${x}) * 180.0 / Math.PI)` + inverted
+                break;
+            }
+            case 'ceil': {
+                output += `Math.ceil(${getLoweLayerOfData(input)})` + inverted
+                break;
+            }
+            case 'cos': {
+                output += `Math.cos(${getLoweLayerOfData(input)} * Math.PI / 180.0)` + inverted
+                break;
+            }
+            case 'exp': {
+                output += `Math.exp(${getLoweLayerOfData(input)})` + inverted
+                break;
+            }
+            case 'floor': {
+                output += `Math.floor(${getLoweLayerOfData(input)})` + inverted
+                break;
+            }
+            case 'log': {
+                output += `Math.log(${getLoweLayerOfData(input)})` + inverted
+                break;
+            }
+            case 'max': {
+                output += `Math.max(${getLoweLayerOfData(input, ',')})` + inverted
+                break;
+            }
+            case 'min': {
+                output += `Math.min(${getLoweLayerOfData(input, ',')})` + inverted
+                break;
+            }
+            case 'pow': {
+                let a = compile_formula(input.value[0] || 1)
+                let b = compile_formula(input.value[1] || 1)
+                output += `Math.pow(${a}, ${b})` + inverted
+                break;
+            }
+            case 'round': {
+                output += `Math.round(${getLoweLayerOfData(input)})` + inverted
+                break;
+            }
+            case 'sin': {
+                output += `Math.sin(${getLoweLayerOfData(input)} * Math.PI / 180.0)` + inverted
+                break;
+            }
+            case 'sqrt': {
+                output += `Math.sqrt(${getLoweLayerOfData(input)})` + inverted
+                break;
+            }
+            case 'tan': {
+                output += `Math.tan(${getLoweLayerOfData(input)} * Math.PI / 180.0)` + inverted
+                break;
+            }
+            case 'rad': {
+                output += `(${getLoweLayerOfData(input)} * Math.PI / 180.0)` + inverted
+                break;
+            }
+            case 'deg': {
+                output += `(${getLoweLayerOfData(input)} * 180.0 / Math.PI)` + inverted
+                break;
+            }
+
+
             case 'linearFunction': {
                 let k = compile_formula(input.value[0] || 1)
                 let x = compile_formula(input.value[1] || 1)
