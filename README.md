@@ -33,8 +33,13 @@ This time it would aswell suck at the beginning, but it will grasp on what to do
 Having the code running for (let's say) 1 hour it gets just as good as the other code last time, despite it being a different game, but with some slight similarities.
 Now let's say we delete all project files for learning to play Game_A and we try again.
 This time having the code run for (let's say) 10 minutes, we get the same results we had the first time in 8 hours.
+Despite losing all projects, if the global 'brain' scope is still intact, retraining the same projects from scratch would be a much easier job, having experience from training on both the games before.
 
-This sounds farfetched, but here I've tested the basic functions to make this work (here using Node.JS, with code written as modules) and it does work with having access to all that is needed.
+A proper database should be set-up to regularily see how often were some functions useful for GA training in any project. It should be able to show which functions became obsolete with time and get permanently deleted when some requirements are met.
+
+Wouldn't this mean a single AI would be able to learn almost everything???
+
+This sounds farfetched, but here I've tested the basic functions to make this work (using Node.JS, with code written as modules) and it does work with having access to all that is needed.
 
 ### Status
 All in all about 5% finished!
@@ -101,7 +106,8 @@ The compiler processes line types on every row of the gene array at [0], which d
 The compiler then prepares the string compiling technique, based on the line type and starts generating the 'formula' of the nested arguments.
 
 The GA is not implemented yet!
-It will 
+
+// More to be written ...
 
 ### Prerequisites
 
