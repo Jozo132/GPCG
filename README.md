@@ -9,7 +9,7 @@ I'm not a specialits nor did I do any extensive research on GA (Genetic Algorith
 Whatever you read here, I am writing this from scratch. This means a lot of worngly used references and words will be used. I'll still try.
 
 I'm unsure if the proposed code generation algorhitm exists, so I've already started working on it my own way.
-There is a video online of something similar written in Python, but it was limited only to a few functions.
+There is a [video](https://www.youtube.com/watch?v=G_dpBsu2Y4Q) online of something similar written in Python, but it was limited only to a few functions.
 
 Personally, I've not found any examples of AI being programmed this way.
 If something exactly like this exists or similar, please let me know!
