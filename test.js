@@ -129,6 +129,9 @@ const operators = [
     }
 ]
 
+Object.defineProperty(EXPRESSIONS, "length", { enumerable: false, writable: false, value: Object.keys(EXPRESSIONS).length });
+Object.defineProperty(EXPRESSIONS, "forEach", { enumerable: false, writable: false, value: cb => Object.keys(EXPRESSIONS).forEach((k, i) => cb(EXPRESSIONS[k], k, i)) });
+
 const declarations = [
     {
         name: "const",
