@@ -1197,7 +1197,7 @@ const DECLARATIONS = [
 
 module.exports = {
     PARAMS: {
-        debug: false
+        debug: true
         //const BRAIN_folder = `C:/brain`;  // Future long-term gobal function store
     },
     DECLARATIONS: DECLARATIONS,
