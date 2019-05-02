@@ -10,13 +10,14 @@ var DECLARATIONS;
 var debug = false;
 
 /**
- * @param {{ ignore?: Object; }} config
+ * @param {{ ignore?: string[], maxDepth?: number; }} config
  * @param {String[]} variables
  * @param {number} level
  */
 const randomExpression = (config, variables, level) => {
     config = config || {}
     let ignore = config.ignore || []
+    if (config.maxDepth > level - 1) ignore.push('operation');
     let expression = {
         type: '',
         value: [] || 0 || '',
@@ -107,17 +108,17 @@ const create_random_genetic_code = (options, callback) => {
     var returnedOutput = [];
     // @ts-ignore
     configuration[1].outputs.forEach(type => {
-        if (type === 'number') returnedOutput.push(randomExpression({ ignore: ['constant'] }, variables, 0))
+        if (type === 'number') returnedOutput.push(randomExpression({ ignore: ['constant'], maxDepth: options.maxDepth }, variables, 0))
     });
     random_code.push(['return', returnedOutput]);
 
-    if (debug) console.log(`####################################`)
+    //console.log(`####################################`)
     console.log(`Random genetic code generated`)
-    if (debug) console.log(`####################################`)
-    if (debug) console.log(JSON.stringify(stats))
-    if (debug) console.log(JSON.stringify(configuration))
-    if (debug) random_code.forEach(line => console.log(JSON.stringify(line)))
-    if (debug) console.log(`####################################`)
+    //console.log(`####################################`)
+    //console.log(JSON.stringify(stats))
+    //console.log(JSON.stringify(configuration))
+    //random_code.forEach(line => console.log(JSON.stringify(line)))
+    //console.log(`####################################`)
 
     var genetic_code = [];
 
