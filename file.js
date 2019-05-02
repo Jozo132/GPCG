@@ -23,11 +23,11 @@ const localExecution = (code, callback) => {
     //} catch (e) { console.log(`Failed to execute: ${e}`) }
 }
 
-const storeFs_and_execute = (file, code, callback) => {
+const storeFs_and_execute = (code, file, callback) => {
     saveFile(file, code, err => {
         if (err) return console.log(err);
         console.log("File saved!");
-        localExecution(file, callback);
+        localExecution(code, callback);
     });
 }
 
