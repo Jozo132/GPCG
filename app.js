@@ -20,18 +20,22 @@ var http = new (require('http').Server)(app);
 var io = require('socket.io')(http);
 */
 
-(() => {
-    const randomConfig = {
-        size: 10,
-        inputs: ['number'],
-        outputs: ['number']
+const randomConfig = {
+    size: 10,
+    maxDepth: 3,
+    inputs: ['number'],
+    outputs: ['number']
+}
+const runCode = code => {
+    let diff = 0;
+    for (var i = -10; i <= 10; i++) {
+        let output = code(i)[0];
+        diff = diff || 0;
+        diff = output - diff;
+        console.log(`function(${i}) = ${output.toFixed(4)} \t\t diff = ${diff.toFixed(4)}`)
     }
-    const runCode = code => {
-        for (var i = -10; i <= 10; i++)
-            console.log(`function(${i}) = ${code(i)}`)
-    }
-    const execute = compiled_code => file.execute(compiled_code, code => runCode(code));
-    const compile = genetic_code => compiler.compile(genetic_code, compiled_code => execute(compiled_code));
-    const randomize = () => randomizer.generate(randomConfig, genetic_code => compile(genetic_code));
-    randomize();
-})()
+}
+const execute = (compiled_code, filePath) => file.saveAndRun(compiled_code, filePath, runCode);
+const compile = genetic_code => compiler.compile(genetic_code, execute);
+const randomize = () => randomizer.generate(randomConfig, compile);
+randomize();
