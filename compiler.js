@@ -108,8 +108,14 @@ const geneCompiler = (genetic_code, callback) => {
     generatedCodeLines.unshift(`\targs = Array.isArray(args) ? args : [args]; // Function input is always an array`);
     generatedCodeLines.unshift(`\tlet args = JSON.parse(JSON.stringify(arg_in)) // AVOID MUTATION OF INPUT ARGUMENTS, we do not want hell to break lose`);
     generatedCodeLines.unshift(`module.exports = exports = (arg_in) => {`);
-    generatedCodeLines.unshift(`const GENETIC_SOURCE_CODE = ${JSON.stringify(genetic_code)};`);   // Store GENE source code into file
-    generatedCodeLines.unshift(`// GPCG - Compiled Genetic Code\n// Github: https://github.com/Jozo132/GPCG\n// Configuration: ${JSON.stringify(gene_config)}\n// Ancestor ID signature: ${gene_info.ancestor}\n// Generation ${gene_info.generation - gene_info.generation_offset}\n// Mutation ID signature: ${gene_info.uuid}\n// Timestamp: ${timestamp()}`);
+    //generatedCodeLines.unshift(`const GENETIC_SOURCE_CODE = ${JSON.stringify(genetic_code)};`);   // Store GENE source code into file
+    generatedCodeLines.unshift(`// Timestamp: ${timestamp()}`);
+    generatedCodeLines.unshift(`// Mutation ID signature: ${gene_info.uuid}`);
+    generatedCodeLines.unshift(`// Generation ${gene_info.generation - gene_info.generation_offset}`);
+    generatedCodeLines.unshift(`// Ancestor ID signature: ${gene_info.ancestor}`);
+    generatedCodeLines.unshift(`// Configuration: ${JSON.stringify(gene_config)}`);
+    generatedCodeLines.unshift(`// Github: https://github.com/Jozo132/GPCG`);
+    generatedCodeLines.unshift(`// GPCG - Compiled Genetic Code`);
     //generatedCodeLines.unshift(`const ext_sqrt = require('${BRAIN_folder}/squareRoot_inMemory')`); // Future long-term gobal function store
     generatedCodeLines.push('};')
     let generatedCode = generatedCodeLines.join('\n');
