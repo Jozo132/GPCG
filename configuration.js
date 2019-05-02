@@ -1,46 +1,10 @@
 // @ts-check
-"use strict";
-
+'use strict';
 var colors = require('colors');
-//const BRAIN_folder = `C:/brain`;  // Future long-term gobal function store
-const fs = require('fs');
-const mkdirp = require('mkdirp');
-const requireFromString = require('require-from-string');
+
 const moment = require('moment');
+
 const timestamp = (input, format) => { if (input) return format ? moment(input).format(format) : moment(input).format("YYYY-MM-DD HH:mm:ss"); else return format ? moment().format(format) : moment().format("YYYY-MM-DD HH:mm:ss"); };
-let console_log = console.log.bind(console);
-console.log = data => { console_log(`[${timestamp(undefined, "YYYY-MM-DD HH:mm:ss.SSS")}]: `, data); };
-
-const fe = (o, cb) => Object.keys(o).forEach((k, i) => cb(o[k], k, i))
-
-const saveFile = (file, data, callback) => {
-    console.log(`Saving file '${file}' ...`);
-    mkdirp(file.substr(0, file.lastIndexOf("/")), e => {
-        if (e) console.log(e);
-        fs.writeFile(file, data, callback);
-    })
-}
-
-
-const localExecution = (code, callback) => {
-    console.log("Local execution, not saving code.");
-    //try {
-    let imported_code = requireFromString(code)  // Import generated module file
-    callback(imported_code);
-    //} catch (e) { console.log(`Failed to execute: ${e}`) }
-}
-
-const storeFs_and_execute = (file, code, callback) => {
-    saveFile(file, code, err => {
-        if (err) return console.log(err);
-        console.log("Saved! Now loading and returning the module");
-        //try {
-        let imported_code = require(file)  // Import generated module file
-        callback(imported_code)
-        //} catch (e) { console.log(`Failed to execute '${file}': ${e}`) }
-    });
-}
-
 
 /** Generate random hash-like string for UUID
  * @param {number} length 
@@ -74,7 +38,6 @@ const constrain = (input, min, max) => input < Math.min(max, min) ? Math.min(max
 const scale = (value, start1, stop1, start2, stop2) => start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1))
 
 
-
 /** Randomly select a number between min and max where a higher number is rarer to be selected
  * @param {number} min 
  * @param {number} max 
@@ -87,48 +50,30 @@ const random_lowChance = (min, max) => { const lo = x => (2 * x - 1), qo = x => 
  * @param {number} max 
  */
 const random_chance = (min, max) => Math.round(Math.random() * ((max - min))) + min;
+
+
+/**
+ * @param {any[]} array
+ * @returns radnom array option
+ * @example
+ * random_item([1,2,3]); // Output: 3
+ */
 const random_item = array => array[random_chance(0, array.length - 1)]
 
-//const isInverted = is => is < 0 || is === true ? '*(-1)' : '';
+
+/**
+ * @param {number | boolean} is
+ * @returns {number} -1 or 1
+ * @example
+ * isInverted()         // Output:  1
+ * isInverted(true);    // Output: -1
+ * isInverted(false);   // Output:  1
+ * isInverted(1)        // Output:  1
+ * isInverted(0)        // Output:  1
+ * isInverted(-1)       // Output: -1
+ */
 const isInverted = is => is < 0 || is === true ? -1 : 1;
 
-
-/*
-            case 'Step': {
-                output += `(${getLoweLayerOfData(input)} >= 0.0 ? 1.0 : 0.0)` + inverted;
-                break;
-            }
-            case 'ReLU': {
-                output += `(${getLoweLayerOfData(input)} > 0.0 ? ${getLoweLayerOfData(input)} : 0.0)` + inverted;
-                break;
-            }
-            case 'Leaky ReLU': {
-                output += `(${getLoweLayerOfData(input)} >= 0.0 ? ${getLoweLayerOfData(input)} : 0.01 * ${getLoweLayerOfData(input)})` + inverted;
-                break;
-            }
-            case 'PReLU': {
-                let x = compile_formula(input.value[0] || 0);
-                let a = compile_formula(input.value[1] || 0.01);
-                output += `(${x} >= 0.0 ? ${x} : ${a} * ${x})` + inverted;
-                break;
-            }
-            case 'Sigmoid': {
-                output += `(1.0 / (1.0 + Math.exp(-1.0 * ${getLoweLayerOfData(input)})))` + inverted;
-                break;
-            }
-            case 'Tanh': {
-                output += `(2.0 / (1.0 + Math.exp(-2.0 * ${getLoweLayerOfData(input)})) - 1.0)` + inverted;
-                break;
-            }
-            case 'ArcTan': {
-                output += `Math.atan(${getLoweLayerOfData(input)})`
-                break;
-            }
-            case 'SoftPlus': {
-                output += `Math.log(1.0 + Math.exp(${getLoweLayerOfData(input)}))` + inverted;
-                break;
-            }
-*/
 
 
 const EXPRESSIONS = {
@@ -1228,11 +1173,7 @@ Object.defineProperty(EXPRESSIONS, "length", { enumerable: false, writable: fals
 Object.defineProperty(EXPRESSIONS, "forEach", { enumerable: false, writable: false, value: cb => Object.keys(EXPRESSIONS).forEach((k, i) => cb(EXPRESSIONS[k], k, i)) });
 
 
-
-
-
-
-const declarations = [
+const DECLARATIONS = [
     {
         name: "const",
         type: "any",
@@ -1253,341 +1194,22 @@ const declarations = [
     }
 ]
 
-/** Genetic line compiler
- * @param {Array} codeLineArray Input row array of gene
- * @param {number} index Row number of genetic code
- */
-const compile_line = (codeLineArray, index) => {
-    let output;
-    let line_type = codeLineArray[0];
-    switch (line_type) {
-        case 'const': case 'var': case 'let': {
-            let X_type = line_type;
-            let X_key = codeLineArray[1];
-            let formulas = [];
-            codeLineArray[2].forEach(value_Array => formulas.push(compileExpression(value_Array)));
-            let formula = formulas.join(' + ');
-            output = `\t${X_type} ${X_key} = ${formula};`;
-            break;
-        }
-        case 'assign':
-            let X_key = codeLineArray[1];
-            let formulas = [];
-            codeLineArray[2].forEach(value_Array => formulas.push(compileExpression(value_Array)));
-            let formula = formulas.join(' + ');
-            output = `\t${X_key} = ${formula};`;
-            break;
-        case 'return': {
-            let formulas = [];
-            codeLineArray[1].forEach(value_Array => formulas.push(compileExpression(value_Array)));
-            let formula = formulas.join(' , ');
-            output = `\treturn [ ${formula} ];`;
-            break;
-        }
+
+module.exports = {
+    PARAMS: {
+        debug: false
+        //const BRAIN_folder = `C:/brain`;  // Future long-term gobal function store
+    },
+    DECLARATIONS: DECLARATIONS,
+    EXPRESSIONS: EXPRESSIONS,
+    FUNCTIONS: {
+        timestamp: timestamp,
+        genString: genString,
+        constrain: constrain,
+        scale: scale,
+        random_lowChance: random_lowChance,
+        random_chance: random_chance,
+        random_item: random_item,
+        isInverted: isInverted
     }
-    return output;
 }
-
-
-const generate_Code = abstract_code => {
-    let compiled_code = [];
-    abstract_code.forEach((row, i) => {
-        let line = compile_line(row, i + 1);
-        if (typeof line === 'string') compiled_code.push(line);
-    });
-    return compiled_code;
-}
-
-const compileExpression = input => {
-    let inverted = input.inverted < 0 || input.inverted === true ? '*(-1)' : '';
-    let output = '';
-    const getLoweLayerOfData = (x, seperator) => {
-        let output_string = ''
-        seperator = ` ${seperator} ` || ' + ';
-        if (Array.isArray(x.value)) {
-            let stringArray = []
-            x.value.forEach(val => stringArray.push(compileExpression(val)))
-            let combined = stringArray.length > 1 ? `(${stringArray.join(' + ')})` : stringArray.join(' + ');
-            output_string += ((x.multiplier | 0) > 0 || (x.multiplier | 0) < 0) ? `(${combined} * ${Math.pow(10, x.multiplier | 0)})` : combined;
-        } else
-            output_string += ((x.multiplier | 0) > 0 || (x.multiplier | 0) < 0) ? `(${x.value} * ${Math.pow(10, x.multiplier | 0)})` : x.value;
-        return output_string
-    }
-
-    if ((typeof input.type === "undefined" || input.type === "default") && typeof input.value === "number")
-        output += (input.value * Math.pow(10, input.multiplier | 0)) + inverted
-    else if ((typeof input.type === "undefined" || input.type === "link") && typeof input.value === "string") {
-        output += (((input.multiplier | 0) > 0 || (input.multiplier | 0) < 0) ? `(${input.value} * ${Math.pow(10, input.multiplier | 0)})` : input.value) + inverted;
-    } else
-        output = EXPRESSIONS[input.type].calculate(input, getLoweLayerOfData);
-    return output;
-}
-
-const geneCompiler = (gnetic_code) => {
-    let randomFilename = genString(24);
-    let sim_dir = `sim_${timestamp(null, "YYYY-MM-DD")}`
-    console.log("########### Starting test ###########\n");
-    console.log(`Executing GPCG Gene compiler with the following data:`)
-    let inputRows = [];
-    let gene_info = {};
-    let gene_config = {};
-    gnetic_code.forEach(codeLineArray => {
-        if (codeLineArray[0] === 'signature') gene_info = codeLineArray[1];
-        if (codeLineArray[0] === 'config') gene_config = codeLineArray[1];
-    })
-    gnetic_code.forEach(row => inputRows.push(JSON.stringify(row)));
-    inputRows.forEach(row => console.log(row.black.bgWhite))
-    let targetFile = `./gen/${sim_dir}/${randomFilename}.js`
-    let generatedCodeLines = generate_Code(gnetic_code);
-    generatedCodeLines.unshift(`\targs = Array.isArray(args) ? args : [args]; // Function input is always an array`);
-    generatedCodeLines.unshift(`\tlet args = JSON.parse(JSON.stringify(arg_in)) // AVOID MUTATION OF INPUT ARGUMENTS, we do not want hell to break lose`);
-    generatedCodeLines.unshift(`module.exports = exports = (arg_in) => {`);
-    generatedCodeLines.unshift(`const GENETIC_SOURCE_CODE = ${JSON.stringify(gnetic_code)};`);   // Store GENE source code into file
-    generatedCodeLines.unshift(`// GPCG - Compiled Genetic Code\n// Github: https://github.com/Jozo132/GPCG\n// Configuration: ${JSON.stringify(gene_config)}\n// Ancestor ID signature: ${gene_info.ancestor}\n// Generation ${gene_info.generation - gene_info.generation_offset}\n// Mutation ID signature: ${gene_info.uuid}\n// Timestamp: ${timestamp()}`);
-    //generatedCodeLines.unshift(`const ext_sqrt = require('${BRAIN_folder}/squareRoot_inMemory')`); // Future long-term gobal function store
-    generatedCodeLines.push('};')
-    let generatedCode = generatedCodeLines.join('\n');
-    console.log("Gene compiled! Code ready to be ported into a NodeJS module");
-    console.log(targetFile.black.bgYellow);
-    generatedCodeLines.forEach(row => console.log(row.black.bgWhite));
-    let last = [];
-    const execute = code => {
-        for (var i = -10; i <= 10; i += 1) {
-            let args = [i, i-1];
-            let returned = code(args);
-            let delta = [];
-
-            let returned_str_A = [];
-            let delta_str_A = [];
-
-            returned.forEach((val, i) => {
-                delta[i] = val - (last[i] || 0)
-                returned_str_A.push(val.toFixed(4));
-                delta_str_A.push(delta[i].toFixed(4));
-            })
-            last = returned;
-
-
-
-            console.log(`function([ ${args.join(' , ')} ])  =>  [ ${returned_str_A.join(' , ')} ] \tdelta [ ${delta_str_A.join(' , ')} ]`)
-        }
-    }
-    // Just execute the code
-    //localExecution(generatedCode, execute);
-    // Store generated code locally and execute
-    storeFs_and_execute(targetFile, generatedCode, execute);
-}
-
-
-
-
-/**
- * @param {{ ignore?: Object; }} config
- * @param {String[]} variables
- * @param {number} level
- */
-const randomExpression = (config, variables, level) => {
-    config = config || {}
-    let ignore = config.ignore || []
-    let expression = {
-        type: '',
-        value: [] || 0 || '',
-        multiplier: 0,
-        inverted: false
-    }
-    let options = [];
-    let allOptions = [];
-    let chance = Math.random();
-    if (level === 0)
-        EXPRESSIONS.forEach((EXPR, name) => {
-            if (EXPR.parameters.useAsBase) {
-                if (EXPR.parameters.chanceToUse >= chance && !ignore.includes(EXPR.group)) options.push(name);
-                allOptions.push(name);
-            }
-        })
-    else
-        EXPRESSIONS.forEach((EXPR, name) => {
-            if (EXPR.parameters.chanceToUse >= chance && !ignore.includes(EXPR.group)) options.push(name);
-            allOptions.push(name);
-        })
-
-    var selectedExpression = options.length > 0 ? random_item(options) : random_item(allOptions);
-    expression = EXPRESSIONS[selectedExpression].random(variables, vars => randomExpression(config, vars, level + 1));
-    return expression
-}
-
-
-
-const incrementCharactedName = c => { const same = (str, char) => { let i = str.length; while (i--) if (str[i] !== char) return false; return true; }; const nextLetter = l => l < 90 ? String.fromCharCode(l + 1) : 'A'; var u = c.toUpperCase(); if (same(u, 'Z')) { var txt = ''; var i = u.length; while (i--) txt += 'A'; return (txt + 'A'); } else { var p = ""; var q = ""; if (u.length > 1) { p = u.substring(0, u.length - 1); q = String.fromCharCode(p.slice(-1).charCodeAt(0)); } var l = u.slice(-1).charCodeAt(0); var z = nextLetter(l); return (z === 'A') ? (p.slice(0, -1) + nextLetter(q.slice(-1).charCodeAt(0)) + z).toLowerCase() : (p + z).toLowerCase(); } }
-
-
-
-
-
-const create_random_genetic_code = sizeinput => {
-    let variable_character_name = 'a';
-    const size = sizeinput || 55;
-    const ancestorId = genString(16);
-    let stats = ["signature", { ancestor: ancestorId, generation: 1, generation_offset: 0, uuid: ancestorId }]
-    let configuration = ["config", { inputs: ["number", "number"], outputs: ["number", "number", "number", "number"] }]
-    var random_code = [];
-
-    var declaredVariables = [];
-    // @ts-ignore
-    configuration[1].inputs.forEach((type, index) => declaredVariables.push({ name: 'input', type: type, id: `args[${index}]`, modify: false }))
-    for (var done_buying = false, x = 0; !done_buying && (x < size); x++) {
-        var row = [];
-        var selected = {};
-        let declaredStuff = {}
-        declaredVariables.forEach(variable => {
-            if (variable.name === 'var' || variable.name === 'let') declaredStuff.editable = declaredStuff.editable || 1;
-            if (variable.name === 'const' || variable.name === 'input') declaredStuff.static = declaredStuff.static || 1;
-        })
-        if (declaredStuff.editable > 0) { // If variables already exist, use option to modify them
-            let options = ["const", "var", "assign"];
-            let x = options[random_chance(0, options.length - 1)];
-            declarations.forEach(decl => { if (decl.name === x) selected = JSON.parse(JSON.stringify(decl)); });
-        } else {
-            let options = ["const", "var"];
-            let x = options[random_chance(0, options.length - 1)];
-            declarations.forEach(decl => { if (decl.name === x) selected = JSON.parse(JSON.stringify(decl)); });
-        }
-        let id = '';
-        if (selected.name === 'assign') {
-            let editableOptions = [];
-            declaredVariables.forEach(declared => { if (declared.modify) editableOptions.push(declared.id); });
-            id = random_item(editableOptions);
-        } else {
-            id = variable_character_name; //selected.identifier + genString(8);
-            variable_character_name = incrementCharactedName(variable_character_name);
-        }
-
-        var value = [];
-        var variables = [];
-        declaredVariables.forEach(variable => variables.push(variable.id))
-        value = [randomExpression({}, variables, 0)];
-        declaredVariables.push({ name: selected.name, id: id, modify: selected.modify });
-        row = [selected.name, id, value]
-        random_code.push(row);
-        if (Math.random() > 0.9) done_buying = true;
-    }
-
-
-    var variables = [];
-    declaredVariables.forEach(variable => variables.push(variable.id))
-    var returnedOutput = [];
-    // @ts-ignore
-    configuration[1].outputs.forEach(type => {
-        if (type === 'number') returnedOutput.push(randomExpression({ ignore: ['constant'] }, variables, 0))
-    });
-    random_code.push(['return', returnedOutput]);
-
-    console.log(`####################################`)
-    console.log(`########  DONE GENERATING  #########`)
-    console.log(`####################################`)
-    console.log(JSON.stringify(stats))
-    console.log(JSON.stringify(configuration))
-    random_code.forEach(line => console.log(JSON.stringify(line)))
-    console.log(`####################################`)
-
-    var genetic_code = [];
-
-    genetic_code.push(stats);
-    genetic_code.push(configuration);
-    random_code.forEach(line => genetic_code.push(line));
-
-    geneCompiler(genetic_code);
-}
-
-create_random_genetic_code();
-
-
-
-/*
-const compile_formula = input => {
-    let inverted = input.inverted < 0 || input.inverted === true ? '*(-1)' : '';
-    let output = '';
-    const getLoweLayerOfData = (x, seperator) => {
-        let output_string = ''
-        seperator = ` ${seperator} ` || ' + ';
-        if (Array.isArray(x.value)) {
-            let stringArray = []
-            x.value.forEach(val => stringArray.push(compile_formula(val)))
-            let combined = stringArray.length > 1 ? `(${stringArray.join(' + ')})` : stringArray.join(' + ');
-            output_string += ((x.multiplier | 0) > 0 || (x.multiplier | 0) < 0) ? `(${combined} * ${Math.pow(10, x.multiplier | 0)})` : combined;
-        } else
-            output_string += ((x.multiplier | 0) > 0 || (x.multiplier | 0) < 0) ? `(${x.value} * ${Math.pow(10, x.multiplier | 0)})` : x.value;
-        return output_string
-    }
-
-    if ((typeof input.type === "undefined" || input.type === "default") && typeof input.value === "number")
-        output += (input.value * Math.pow(10, input.multiplier | 0)) + inverted
-    else if ((typeof input.type === "undefined" || input.type === "link") && typeof input.value === "string") {
-        output += (((input.multiplier | 0) > 0 || (input.multiplier | 0) < 0) ? `(${input.value} * ${Math.pow(10, input.multiplier | 0)})` : input.value) + inverted;
-    } else
-        switch (input.type) {
-            case 'Step': {
-                output += `(${getLoweLayerOfData(input)} >= 0.0 ? 1.0 : 0.0)` + inverted;
-                break;
-            }
-            case 'ReLU': {
-                output += `(${getLoweLayerOfData(input)} > 0.0 ? ${getLoweLayerOfData(input)} : 0.0)` + inverted;
-                break;
-            }
-            case 'Leaky ReLU': {
-                output += `(${getLoweLayerOfData(input)} >= 0.0 ? ${getLoweLayerOfData(input)} : 0.01 * ${getLoweLayerOfData(input)})` + inverted;
-                break;
-            }
-            case 'PReLU': {
-                let x = compile_formula(input.value[0] || 0);
-                let a = compile_formula(input.value[1] || 0.01);
-                output += `(${x} >= 0.0 ? ${x} : ${a} * ${x})` + inverted;
-                break;
-            }
-            case 'Sigmoid': {
-                output += `(1.0 / (1.0 + Math.exp(-1.0 * ${getLoweLayerOfData(input)})))` + inverted;
-                break;
-            }
-            case 'Tanh': {
-                output += `(2.0 / (1.0 + Math.exp(-2.0 * ${getLoweLayerOfData(input)})) - 1.0)` + inverted;
-                break;
-            }
-            case 'ArcTan': {
-                output += `Math.atan(${getLoweLayerOfData(input)})`
-                break;
-            }
-            case 'SoftPlus': {
-                output += `Math.log(1.0 + Math.exp(${getLoweLayerOfData(input)}))` + inverted;
-                break;
-            }
-
-            default:
-                if (Array.isArray(input.value)) output += getLoweLayerOfData(input);
-                else output += input.value;
-                break;
-        }
-    return output;
-}
-*/
-
-
-
-
-
-const example_output_data = [
-    ["signature", { ancestor: '2ECVyQYjd7QLoa', generation: 6, generation_offset: 2, uuid: 'ItRAwxaIkshSOU' }],
-    ["const", 'num_const_zc91Xi3U', [{ type: "mul", value: [{ type: "sin", value: [{ type: 'input', value: 0 }], multiplier: 1 }, { value: 0.41, multiplier: 1 }, { value: 0.5 }] }]],
-    ["var", 'num_var_Nq9qdV98', [{ type: "linearFunction", value: [{ value: 0.82, multiplier: 0 }, { type: "round", value: 'num_const_zc91Xi3U' }, { type: "sin", value: [{ type: 'input', value: 0 }] }] }]],
-    ["assign", 'num_var_Nq9qdV98', [{ type: "scalar", value: [{ type: "SoftPlus", value: 'num_var_Nq9qdV98', multiplier: 1 }, { type: "cos", value: 'num_const_zc91Xi3U' }] }]],
-    ["return", [{ type: undefined, value: 'num_var_Nq9qdV98', multiplier: 0, inverted: -1 }]]
-    //["return", [{ value: 'ext_sqrt(16)' }]]   // Future long-term gobal function store
-];
-
-
-
-
-
-
-
-setTimeout(() => geneCompiler(example_output_data), 4000);
-
