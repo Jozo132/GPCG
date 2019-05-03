@@ -2,16 +2,13 @@
 'use strict';
 
 const GLOBAL_CONFIG = require('./configuration');
-
-const compiler = require('./compiler');
-const randomizer = require('./randomizer');
-compiler.init(GLOBAL_CONFIG);
-randomizer.init(GLOBAL_CONFIG);
+const compiler = require('./compiler')(GLOBAL_CONFIG);
+const randomizer = require('./randomizer')(GLOBAL_CONFIG);
 
 const file = require('./file');
 
-let console_log = console.log.bind(console);
-console.log = data => { console_log(`[${GLOBAL_CONFIG.FUNCTIONS.timestamp(undefined, "YYYY-MM-DD HH:mm:ss.SSS")}]: `, data); };
+const console_log = console.log.bind(console);
+console.log = msg => console_log(`[${GLOBAL_CONFIG.FUNCTIONS.timestamp(null, "YYYY-MM-DD HH:mm:ss.SSS")}]: `, msg);
 
 
 var express = require('express');
