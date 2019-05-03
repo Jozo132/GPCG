@@ -49,23 +49,23 @@ io.on('connection', function (socket) {
             maxDepth: 3,
             inputs: ['number'],
             outputs: ['number']
-        }
+        };
 
-        randomizer.generate(randomConfig, random_gene => {
-            raw_genetic_code = random_gene;
+        randomizer.generate(randomConfig, random_gene => {  // Generate random genetic code, based on configuration input
+            raw_genetic_code = random_gene;  // Save genetic code in global variable for later
 
-            compiler.compile(random_gene, (compiled_code, path) => {
-                compiled_genetic_code = compiled_code;
+            compiler.compile(random_gene, (compiled_code, path) => {  // Compile generated genetic code
+                compiled_genetic_code = compiled_code;  // Save compiled code in global variable for later
 
-                file.saveAndRun(compiled_code, path, code => {
-                    executable_code = code;
+                file.saveAndRun(compiled_code, path, code => {  // Save and execute compiled genetic code
+                    executable_code = code;  // Save executable function in global variable for later
 
-                    socket.emit('Generated', {
+                    socket.emit('Generated', {  // Return genetic and compiled code for display on HTML page over Socket.IO
                         gene: raw_genetic_code,
                         code: compiled_genetic_code
                     });
                 });
-            })
+            });
         });
 
     });
@@ -79,16 +79,13 @@ io.on('connection', function (socket) {
             };
         });
         socket.emit('Executed', output);
-    })
+    });
 
     socket.on('disconnect', () => { console.log(`Client disconnected: ${replyFrom}`); socketlist.splice(socketlist.indexOf(socket), 1); });
-    //socket.on('memHistory', () => { socket.emit('memHistory_reply', mem_history) });
 });
 
 
-const httpServer = http.listen(8080, () => {
-    console.log("HTTP server online: http://localhost:8080");
-});
+http.listen(8080, () => console.log("HTTP server online: http://localhost:8080"));
 
 
 
@@ -97,7 +94,7 @@ const httpServer = http.listen(8080, () => {
 
 
 
-
+/*// #### MANUAL TEST ####
 
 const test = () => {
     const randomConfig = {
@@ -120,3 +117,5 @@ const test = () => {
     const randomize = () => randomizer.generate(randomConfig, compile);
     randomize();
 }
+
+//*///
