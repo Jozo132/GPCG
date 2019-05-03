@@ -675,7 +675,7 @@ const EXPRESSIONS = {
         calculate: (input, calback_deeper) => {
             let stringArray = [];
             input.value.forEach(val => stringArray.push(`${calback_deeper(val)}`))
-            return `Math.cos(${stringArray.join(' + ')} * Math.PI / 180.0)`;
+            return `Math.cos((${stringArray.join(' + ')}) * Math.PI / 180.0)`;
         },
         random: (variables, requestExpression) => {
             let input_cnt = random_lowChance(1, 6);
@@ -771,7 +771,7 @@ const EXPRESSIONS = {
         calculate: (input, calback_deeper) => {
             let stringArray = [];
             input.value.forEach(val => stringArray.push(`${calback_deeper(val)}`))
-            return `Math.max( ${stringArray.join(' , ')} )`;
+            return `Math.max(${stringArray.join(' , ')})`;
         },
         random: (variables, requestExpression) => {
             let input_cnt = random_lowChance(2, 6);
@@ -795,7 +795,7 @@ const EXPRESSIONS = {
         calculate: (input, calback_deeper) => {
             let stringArray = [];
             input.value.forEach(val => stringArray.push(`${calback_deeper(val)}`))
-            return `Math.min( ${stringArray.join(' , ')} )`;
+            return `Math.min(${stringArray.join(' , ')})`;
         },
         random: (variables, requestExpression) => {
             let input_cnt = random_lowChance(2, 6);
@@ -915,7 +915,7 @@ const EXPRESSIONS = {
         calculate: (input, calback_deeper) => {
             let stringArray = [];
             input.value.forEach(val => stringArray.push(`${calback_deeper(val)}`))
-            return `Math.tan(${stringArray.join(' + ')} * Math.PI / 180.0)`;
+            return `Math.tan((${stringArray.join(' + ')}) * Math.PI / 180.0)`;
         },
         random: (variables, requestExpression) => {
             let input_cnt = random_lowChance(1, 6);
