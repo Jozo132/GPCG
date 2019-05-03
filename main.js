@@ -28,8 +28,8 @@ io.on('connection', function (socket) {
     var replyFrom = "Client " + socketId;
     console.log(`Cient connected: ${replyFrom}`);
 
-    socket.on('generateNewGene', message => {
-        console.log(`generateNewGene: ${message}`);
+    socket.on('generateNewGene_1', message => {
+        console.log(`generateNewGene_1: ${message}`);
 
         var randomConfig = {
             size: 10,
@@ -47,7 +47,7 @@ io.on('connection', function (socket) {
                 file.execute(compiled_code, /*path,*/ code => {  // Execute compiled genetic code
                     executable_code = code;  // Save executable function in global variable for later
 
-                    socket.emit('Generated', {  // Return genetic and compiled code for display on HTML page over Socket.IO
+                    socket.emit('Generated_1', {  // Return genetic and compiled code for display on HTML page over Socket.IO
                         gene: raw_genetic_code,
                         code: compiled_genetic_code
                     });
@@ -57,16 +57,60 @@ io.on('connection', function (socket) {
 
     });
 
-    socket.on('requestExecution', message => {
+    socket.on('generateNewGene_2', message => {
+        console.log(`generateNewGene_2: ${message}`);
+
+        var randomConfig = {
+            size: 10,
+            maxDepth: 3,
+            inputs: ['number', 'number'],
+            outputs: ['number']
+        };
+
+        randomizer.generate(randomConfig, random_gene => {  // Generate random genetic code, based on configuration input
+            raw_genetic_code = random_gene;  // Save genetic code in global variable for later
+
+            compiler.compile(random_gene, (compiled_code, path) => {  // Compile generated genetic code
+                compiled_genetic_code = compiled_code;  // Save compiled code in global variable for later
+
+                file.execute(compiled_code, /*path,*/ code => {  // Execute compiled genetic code
+                    executable_code = code;  // Save executable function in global variable for later
+
+                    socket.emit('Generated_2', {  // Return genetic and compiled code for display on HTML page over Socket.IO
+                        gene: raw_genetic_code,
+                        code: compiled_genetic_code
+                    });
+                });
+            });
+        });
+
+    });
+
+    socket.on('requestExecution_1', message => {
         var output = [];
         message.forEach((element, i) => {
+            let executed = executable_code(element.a)
             output[i] = {
-                x: element.x,
-                y: executable_code(element.x)[0]
+                a: element.a,
+                x: executed[0]
             };
         });
-        socket.emit('Executed', output);
-        console.log(`Returned request for data execution`);
+        socket.emit('Plot_1', output);
+        console.log(`Returned request for data execution_1`);
+    });
+
+    socket.on('requestExecution_2', message => {
+        var output = [];
+        message.forEach((element, i) => {
+            let executed = executable_code([element.a, element.b])
+            output[i] = {
+                a: element.a,
+                b: element.b,
+                x: executed[0]
+            };
+        });
+        socket.emit('Plot_2', output);
+        console.log(`Returned request for data execution_2`);
     });
 
     socket.on('disconnect', () => { console.log(`Client disconnected: ${replyFrom}`); socketlist.splice(socketlist.indexOf(socket), 1); });
