@@ -128,6 +128,16 @@ node main.js
 
 The code starts a local HTTP server which interfaces with the running code for visual feedback.
 
+
+#### Compiling a manually written genetic code example
+
 <img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/571751346026446856/2019-04-27_19_34_42-_README.md_-_GPCG_-_Visual_Studio_Code.png"/>
+
+#### Compiled randomly generated genetic code
+
 <img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/573450845426024448/2019-05-02_12_03_38-Window.png"/>
+
+
+#### HTML Web interface with 2D plot
+
 <img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/573797849515687936/2019-05-03_11_04_55-.png"/>
