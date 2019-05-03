@@ -1,0 +1,57 @@
+body {
+    font: 12px sans-serif;
+}
+
+.dataWell {
+    margin: 5%;
+    padding: 5%;
+    border: 5%;
+}
+
+
+.mouse_area {
+    opacity: 0;
+}
+
+.guides {
+    stroke-width: 1px;
+}
+
+.guides line {
+    stroke: #BBF;
+    shape-rendering: crispEdges;
+}
+
+.guides circle {
+    fill: #BBF;
+    stroke: #348;
+    opacity: 0.2;
+}
+
+
+.rules line,
+.rules path {
+    shape-rendering: crispEdges;
+    stroke: #000;
+}
+
+.rules .tick {}
+
+.rules .minor {
+    stroke: #BBB;
+}
+
+.rules .domain {
+    fill: none;
+}
+
+.grid .tick {
+    stroke: #CCC;
+}
+
+
+.series path {
+    fill: none;
+    stroke: #348;
+    stroke-width: 3px;
+}
