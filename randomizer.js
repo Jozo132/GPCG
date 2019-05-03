@@ -138,7 +138,9 @@ const setConfig = config => {
     genString = config.FUNCTIONS.genString;
 }
 
-module.exports = {
-    init: setConfig,
-    generate: create_random_genetic_code
+module.exports = config => {
+    var module = {};
+    setConfig(config);
+    module.generate = create_random_genetic_code;
+    return module;
 }
