@@ -132,7 +132,10 @@ const setConfig = config => {
     timestamp = config.FUNCTIONS.timestamp;
 }
 
-module.exports = {
-    init: setConfig,
-    compile: geneCompiler
+/** @param {object} config */
+module.exports = config => {
+    var module = {}
+    setConfig(config);
+    module.compile = geneCompiler;
+    return module;
 }
