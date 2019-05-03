@@ -34,5 +34,5 @@ const storeFs_and_execute = (code, file, callback) => {
 
 module.exports = {
     execute: (code, callback) => localExecution(code, callback),
-    saveAndRun: (file, code, callback) => storeFs_and_execute(file, code, callback)
+    saveAndExecute: (file, code, callback) => storeFs_and_execute(file, code, callback)
 }

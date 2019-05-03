@@ -1,14 +1,14 @@
 // @ts-check
 'use strict';
 
-const GLOBAL_CONFIG = require('./configuration');
-const compiler = require('./compiler')(GLOBAL_CONFIG);
-const randomizer = require('./randomizer')(GLOBAL_CONFIG);
+const ENGINE = require('./engine/engine');
+const compiler = require('./engine/compiler')(ENGINE);
+const randomizer = require('./engine/randomizer')(ENGINE);
 
-const file = require('./file');
+const file = require('./engine/file');
 
 const console_log = console.log.bind(console);
-console.log = msg => console_log(`[${GLOBAL_CONFIG.FUNCTIONS.timestamp(null, "YYYY-MM-DD HH:mm:ss.SSS")}]: `, msg);
+console.log = msg => console_log(`[${ENGINE.FUNCTIONS.timestamp(null, "YYYY-MM-DD HH:mm:ss.SSS")}]: `, msg);
 
 const path = require('path');
 var express = require('express');
@@ -22,7 +22,7 @@ app.use('/', express.static(path.join(__dirname, '/web')))
 
 var raw_genetic_code;
 var compiled_genetic_code;
-var executable_code;
+var executable_code = function (x) { return 0; };
 
 
 
@@ -51,7 +51,7 @@ io.on('connection', function (socket) {
             compiler.compile(random_gene, (compiled_code, path) => {  // Compile generated genetic code
                 compiled_genetic_code = compiled_code;  // Save compiled code in global variable for later
 
-                file.saveAndRun(compiled_code, path, code => {  // Save and execute compiled genetic code
+                file.execute(compiled_code, /*path,*/ code => {  //Execute compiled genetic code
                     executable_code = code;  // Save executable function in global variable for later
 
                     socket.emit('Generated', {  // Return genetic and compiled code for display on HTML page over Socket.IO
@@ -90,7 +90,6 @@ http.listen(8080, () => console.log("HTTP server online: http://localhost:8080")
 
 
 /*// #### MANUAL TEST ####
-
 const test = () => {
     const randomConfig = {
         size: 10,
@@ -112,5 +111,4 @@ const test = () => {
     const randomize = () => randomizer.generate(randomConfig, compile);
     randomize();
 }
-
 //*///
