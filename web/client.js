@@ -1,3 +1,6 @@
+// @ts-check
+"use strict";
+
 var socket;
 
 var visualization = [];
@@ -39,6 +42,8 @@ const HEATMAP = (x, domain) => {
 
 // @ts-ignore
 $(document).ready(() => {
+
+    // @ts-ignore
     socket = io();
     socket.on('connect', () => console.log(`Socket connected to server! ${socket.connected}`));
     socket.on('disconnect', () => {
@@ -46,13 +51,14 @@ $(document).ready(() => {
         socket.open();
     });
 
-    socket.on('Generated', res => {
+    socket.on('Generated_1', res => {
         console.log(res);
         var tablea_raw = `<thead><tr><th scope="col">Genetic code</th></tr></thead><tbody>`;
         res.gene.forEach(row => {
             tablea_raw += `<tr><td>${JSON.stringify(row)}</td></tr>`
         })
         tablea_raw += `</tbody>`;
+        // @ts-ignore
         $('.raw_code').html(tablea_raw)
 
         var tablea_compiled =
@@ -62,28 +68,36 @@ $(document).ready(() => {
             tablea_compiled += `<tr><td>${row}</td></tr>`
         })
         tablea_compiled += `</tbody>`;
+        // @ts-ignore
         $('.compiled_code').html(tablea_compiled)
         visualization = [];
+
         for (var i = -10; i <= 10; i += 0.001) {
             visualization.push({
-                x: i
+                a: i
             })
         }
 
-        socket.emit('requestExecution', visualization);
+        socket.emit('requestExecution_1', visualization);
     })
 
-    socket.on('Executed', res => {
-        //console.log(`Executed response (${typeof res}):${JSON.stringify(res)}`);
+    socket.on('Plot_1', res => {
+        console.log(`Executed_1 response (${typeof res}):${JSON.stringify(res)}`);
         visualization = res;
         var plotData = [];
         res.forEach(packet => {
-            plotData.push([packet.x, packet.y])
+            plotData.push([packet.a, packet.x])
         })
 
-        const extent_x = d3.extent(d3.values(visualization.map(d => d.x)))
-        const extent_y = d3.extent(d3.values(visualization.map(d => d.y)))
+        // @ts-ignore
+        const extent_x = d3.extent(d3.values(visualization.map(d => d.a)))
+        // @ts-ignore
+        const extent_y = d3.extent(d3.values(visualization.map(d => d.x)))
 
+
+        // @ts-ignore
+        d3.select(".plot").selectAll("svg").remove()
+        // @ts-ignore
         functionPlot({
             title: 'y = compiled_genetic_code( x )',
             target: '.plot',
@@ -104,5 +118,120 @@ $(document).ready(() => {
                 graphType: 'polyline'
             }]
         });
+    });
+
+
+    socket.on('Generated_2', res => {
+        console.log(res);
+        var tablea_raw = `<thead><tr><th scope="col">Genetic code</th></tr></thead><tbody>`;
+        res.gene.forEach(row => tablea_raw += `<tr><td>${JSON.stringify(row)}</td></tr>`)
+        tablea_raw += `</tbody>`;
+        // @ts-ignore
+        $('.raw_code').html(tablea_raw)
+
+        var tablea_compiled = `<thead><tr><th scope="col">Compiled genetic code</th></tr></thead><tbody>`;
+        var koda = res.code.replace(/\t/g, '    ')
+        koda.split('\n').forEach(row => tablea_compiled += `<tr><td>${row}</td></tr>`)
+        tablea_compiled += `</tbody>`;
+        // @ts-ignore
+        $('.compiled_code').html(tablea_compiled)
+        visualization = [];
+
+        for (var a = -10; a <= 10; a += 0.1) {
+            for (var b = -10; b <= 10; b += 0.1) {
+                visualization.push({
+                    a: a,
+                    b: b
+                });
+            }
+        }
+        socket.emit('requestExecution_2', visualization);
+    })
+
+
+    socket.on('Plot_2', data => {
+        console.log(`Executed_2 response (${typeof data}):${JSON.stringify(data)}`);
+        visualization = data;
+        var plotData = [];
+        var all_a = [];
+        var all_b = [];
+        data.forEach(packet => {
+            all_a.push(packet.a);
+            all_b.push(packet.b);
+            plotData.push([packet.a, packet.b])
+        });
+
+        var distict_as = [...new Set(all_a)].sort((a, b) => a - b);
+        var distict_bs = [...new Set(all_b)].sort((a, b) => a - b);
+
+        // @ts-ignore
+        const extent_a = d3.extent(d3.values(visualization.map(d => d.a)))
+        // @ts-ignore
+        const extent_b = d3.extent(d3.values(visualization.map(d => d.b)))
+        // @ts-ignore
+        const extent_x = d3.extent(d3.values(visualization.map(d => d.x)))
+
+        // set the dimensions and margins of the graph
+        var margin = { top: 30, right: 30, bottom: 30, left: 30 },
+            width = 700 - margin.left - margin.right,
+            height = 700 - margin.top - margin.bottom;
+
+        // @ts-ignore
+        d3.select(".plot").selectAll("svg").remove()
+
+        // @ts-ignore
+        var svg = d3.select(".plot")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // @ts-ignore
+        var x = d3.scaleBand()
+            .rangeRound([0, width])
+            .domain(distict_as)
+            .paddingInner(0.0);
+
+        // @ts-ignore
+        var y = d3.scaleBand()
+            .rangeRound([height, 0])
+            .domain(distict_bs)
+            .paddingInner(0.0);
+
+        // @ts-ignore
+        var tooltip = d3.select(".plot")
+            .append("div")
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "2px")
+            .style("border-radius", "5px")
+            .style("padding", "5px")
+
+        var mouseover = d => tooltip.style("opacity", 1)
+        var mouseleave = d => tooltip.style("opacity", 0)
+        var mousemove = d => {
+            tooltip.html(`"genetic_function(${d.a.toFixed(1)},${d.b.toFixed(1)}): ${d.x !== null ? d.x.toFixed(4) : null}`)
+                // @ts-ignore
+                .style("left", (d3.mouse(this)[0] + 70) + "px")
+                // @ts-ignore
+                .style("top", (d3.mouse(this)[1]) + "px")
+        }
+
+        // Add every pixel each
+        svg.selectAll()
+            .data(data, d => d.a + ':' + d.b)
+            .enter()
+            .append("rect")
+            .attr("x", d => x(d.a))
+            .attr("y", d => y(d.b))
+            .attr("width", x.bandwidth())
+            .attr("height", y.bandwidth())
+            .style("fill", d => HEATMAP(d.x, extent_x))
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseleave", mouseleave)
     })
 })
