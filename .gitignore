@@ -62,3 +62,5 @@ typings/
 
 # Genetically generated code
 gen/
+test.js
+cleanup.js
