@@ -42,13 +42,13 @@ Wouldn't this mean a single AI would be able to learn almost everything???
 This sounds farfetched, but here I've tested the basic functions to make this work (using Node.JS, with code written as modules) and it does work with having access to all that is needed.
 
 ### Status
-All in all about 5% finished!
+All in all about 15% finished!
 A long way to go.
 
 - File creation: Done!
-- Import created file: Done!
-- Import raw code without file creation: Done!
-- Gene code to JS source code compiler: ~15% done
+- Import (execute) created file: Done!
+- Import (execute) raw code without file creation: Done!
+- Genetic code to JavaScript Node.JS Module code compiler: ~35% done
 - Support for numeric data type assignments and manipulation (var, let, const): ~75% done
 - Support standard mathematical numeric constants and operations: a lot (including conversion to degrees for angular functions)
 - Support to extend numeric manipulation with individual mutation access: multiplication (x = x * 10^a), inversion (x = ax | a={1,-1})
@@ -95,7 +95,7 @@ This GA algo would be a win-win for multiple similar (or different, who knows) p
 An issue appears here on how to define obsolete functions and clean up the brain of 'dead' cells/genes.
 I've got a rough idea how to deal with it, but it's gonna be a while before this project reaches that point.
 
-Brain functionality has shown to work with manually written code, which is exactly in syntax of what a 'brain' memory function would look like when saved in future updates.
+Brain (long term) functions have shown to work with manually written code, which is exactly in syntax of what a 'brain' memory function would look like when saved in future updates.
 I had to remove this functionality, because it's just unneeded complexity when most of the main code isn't even written yet.
 
 ### LATEST PROGRESS
@@ -123,7 +123,11 @@ npm i
 
 Run app:
 ```bash
-node test
+node main.js
 ```
 
+The code starts a local HTTP server which interfaces with the running code for visual feedback.
+
 <img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/571751346026446856/2019-04-27_19_34_42-_README.md_-_GPCG_-_Visual_Studio_Code.png"/>
+<img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/573450845426024448/2019-05-02_12_03_38-Window.png"/>
+<img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/573797849515687936/2019-05-03_11_04_55-.png"/>
