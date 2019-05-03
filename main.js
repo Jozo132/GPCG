@@ -4,7 +4,6 @@
 const ENGINE = require('./engine/engine');
 const compiler = require('./engine/compiler')(ENGINE);
 const randomizer = require('./engine/randomizer')(ENGINE);
-
 const file = require('./engine/file');
 
 const console_log = console.log.bind(console);
@@ -18,15 +17,9 @@ var io = require('socket.io')(http);
 
 app.use('/', express.static(path.join(__dirname, '/web')))
 
-
-
 var raw_genetic_code;
 var compiled_genetic_code;
 var executable_code = function (x) { return 0; };
-
-
-
-
 
 var socketlist = [];
 io.on('connection', function (socket) {
@@ -51,7 +44,7 @@ io.on('connection', function (socket) {
             compiler.compile(random_gene, (compiled_code, path) => {  // Compile generated genetic code
                 compiled_genetic_code = compiled_code;  // Save compiled code in global variable for later
 
-                file.execute(compiled_code, /*path,*/ code => {  //Execute compiled genetic code
+                file.execute(compiled_code, /*path,*/ code => {  // Execute compiled genetic code
                     executable_code = code;  // Save executable function in global variable for later
 
                     socket.emit('Generated', {  // Return genetic and compiled code for display on HTML page over Socket.IO
@@ -89,7 +82,7 @@ http.listen(8080, () => console.log("HTTP server online: http://localhost:8080")
 
 
 
-/*// #### MANUAL TEST ####
+// #### MANUAL TEST ####
 const test = () => {
     const randomConfig = {
         size: 10,
@@ -106,9 +99,8 @@ const test = () => {
             console.log(`function(${i}) = ${output.toFixed(4)} \t\t diff = ${diff.toFixed(4)}`)
         }
     }
-    const execute = (compiled_code, filePath) => file.saveAndRun(compiled_code, filePath, runCode);
+    const execute = (compiled_code, filePath) => file.saveAndExecute(compiled_code, filePath, runCode);
     const compile = genetic_code => compiler.compile(genetic_code, execute);
     const randomize = () => randomizer.generate(randomConfig, compile);
     randomize();
 }
-//*///
