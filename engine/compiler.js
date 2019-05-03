@@ -108,7 +108,7 @@ const geneCompiler = (genetic_code, callback) => {
     generatedCodeLines.unshift(`\targs = Array.isArray(args) ? args : [args]; // Function input is always an array`);
     generatedCodeLines.unshift(`\tlet args = JSON.parse(JSON.stringify(arg_in)) // AVOID MUTATION OF INPUT ARGUMENTS, we do not want hell to break lose`);
     generatedCodeLines.unshift(`module.exports = exports = (arg_in) => {`);
-    //generatedCodeLines.unshift(`const GENETIC_SOURCE_CODE = ${JSON.stringify(genetic_code)};`);   // Store GENE source code into file
+    generatedCodeLines.unshift(`const GENETIC_SOURCE_CODE = ${JSON.stringify(genetic_code)};`);   // Store GENE source code into file
     generatedCodeLines.unshift(`// Timestamp: ${timestamp()}`);
     generatedCodeLines.unshift(`// Mutation ID signature: ${gene_info.uuid}`);
     generatedCodeLines.unshift(`// Generation ${gene_info.generation - gene_info.generation_offset}`);
