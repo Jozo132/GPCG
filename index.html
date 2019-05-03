@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>GPCG Web Interface</title>
+    <link type="text/css" rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+    <!--<link href="font-awesome.min.css" rel="stylesheet">-->
+    <!--audio id="audioLogin" src="login.mp3"></audio-->
+    <!--audio id="audioLogout" src="logout.mp3"></audio-->
+    <!--audio id="audioMsg" src="newMsg.mp3"></audio-->
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.min.js"></script>
+    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.time.min.js"></script>
+    <!--script src="client.js"></script-->
+    <style type="text/css">
+        body {
+            font: 12px sans-serif;
+        }
+
+        .mouse_area {
+            opacity: 0;
+        }
+
+        .guides {
+            stroke-width: 1px;
+        }
+
+        .guides line {
+            stroke: #BBF;
+            shape-rendering: crispEdges;
+        }
+
+        .guides circle {
+            fill: #BBF;
+            stroke: #348;
+            opacity: 0.2;
+        }
+
+
+        .rules line,
+        .rules path {
+            shape-rendering: crispEdges;
+            stroke: #000;
+        }
+
+        .rules .tick {}
+
+        .rules .minor {
+            stroke: #BBB;
+        }
+
+        .rules .domain {
+            fill: none;
+        }
+
+        .grid .tick {
+            stroke: #CCC;
+        }
+
+
+        .series path {
+            fill: none;
+            stroke: #348;
+            stroke-width: 3px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="input">
+        <button type="button" class="btn btn-primary"
+            onclick="socket.emit('generateNewGene', {inputs:1, outputs: 1})">Generate</button>
+    </div>
+
+    <div class="visual">
+    </div>
+
+    <div class="raw">
+        <table class="table table-sm table-hover table-dark raw_code" style="font-size: 8px">
+            <thead>
+                <tr>
+                    <th scope="col">Genetic code</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>---</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="compiled">
+        <table class="table table-sm table-hover table-dark compiled_code" style="font-size: 8px">
+            <thead>
+                <tr>
+                    <th scope="col">Compiled genetic code</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>---</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        var socket;
+
+        var visualization = [];
+
+        $(document).ready(() => {
+            socket = io();
+            socket.on('connect', () => {
+                console.log(`Socket connected to server! ${socket.connected}`);
+            });
+            socket.on('disconnect', () => {
+                console.log(`Socket lost connection to server! ${socket.connected}`);
+                socket.open();
+            });
+
+            socket.on('Generated', res => {
+                console.log(res);
+                var tablea_raw = `<thead><tr><th scope="col">Genetic code</th></tr></thead><tbody>`;
+                res.gene.forEach(row => {
+                    tablea_raw += `<tr><td>${JSON.stringify(row)}</td></tr>`
+                })
+                tablea_raw += `</tbody>`;
+                $('.raw_code').html(tablea_raw)
+
+                var tablea_compiled =
+                    `<thead><tr><th scope="col">Compiled genetic code</th></tr></thead><tbody>`;
+                var koda = res.code.replace(/\t/g, '    ')
+                koda.split('\n').forEach(row => {
+                    tablea_compiled += `<tr><td>${row}</td></tr>`
+                })
+                tablea_compiled += `</tbody>`;
+                $('.compiled_code').html(tablea_compiled)
+                visualization = [];
+                for (var i = -10; i <= 10; i += 0.1) {
+                    visualization.push({
+                        x: i
+                    })
+                }
+
+                socket.emit('requestExecution', visualization);
+            })
+
+            socket.on('Executed', res => {
+                //console.log(`Executed response (${typeof res}):${JSON.stringify(res)}`);
+                visualization = res;
+
+                console.log(`visualization: ${JSON.stringify(visualization)}`);
+            })
+        })
+    </script>
+</body>
+
+</html>
