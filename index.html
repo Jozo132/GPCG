@@ -21,13 +21,20 @@
     <!--audio id="audioLogout" src="logout.mp3"></audio-->
     <!--audio id="audioMsg" src="newMsg.mp3"></audio-->
     <script src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.min.js"></script>
-    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.time.min.js"></script>
+    <script src="https://unpkg.com/d3@3/d3.min.js"></script>
+    <script src="https://unpkg.com/function-plot@1/dist/function-plot.js"></script>
     <!--script src="client.js"></script-->
     <style type="text/css">
         body {
             font: 12px sans-serif;
         }
+
+        .dataWell {
+            margin: 5%;
+            padding: 5%;
+            border: 5%;
+        }
+
 
         .mouse_area {
             opacity: 0;
@@ -85,11 +92,13 @@
             onclick="socket.emit('generateNewGene', {inputs:1, outputs: 1})">Generate</button>
     </div>
 
-    <div class="visual">
+
+    <div class="col-sm-12">
+        <div class="plot"></div>
     </div>
 
-    <div class="raw">
-        <table class="table table-sm table-hover table-dark raw_code" style="font-size: 8px">
+    <div class="raw col-sm-12">
+        <table class="table table-sm table-hover table-dark raw_code" style="font-size: 8px" width=80>
             <thead>
                 <tr>
                     <th scope="col">Genetic code</th>
@@ -103,8 +112,9 @@
         </table>
     </div>
 
-    <div class="compiled">
-        <table class="table table-sm table-hover table-dark compiled_code" style="font-size: 8px">
+
+    <div class="compiled col-sm-12">
+        <table class="table table-sm table-hover table-dark compiled_code" style="font-size: 8px" width=80>
             <thead>
                 <tr>
                     <th scope="col">Compiled genetic code</th>
@@ -117,6 +127,10 @@
             </tbody>
         </table>
     </div>
+
+
+
+
 
     <script>
         var socket;
@@ -151,7 +165,7 @@
                 tablea_compiled += `</tbody>`;
                 $('.compiled_code').html(tablea_compiled)
                 visualization = [];
-                for (var i = -10; i <= 10; i += 0.1) {
+                for (var i = -10; i <= 10; i += 0.001) {
                     visualization.push({
                         x: i
                     })
@@ -163,8 +177,35 @@
             socket.on('Executed', res => {
                 //console.log(`Executed response (${typeof res}):${JSON.stringify(res)}`);
                 visualization = res;
+                var plotData = [];
+                res.forEach(packet => {
+                    plotData.push([packet.x, packet.y])
+                })
 
-                console.log(`visualization: ${JSON.stringify(visualization)}`);
+                const extent_x = d3.extent(d3.values(visualization.map(d => d.x)))
+                const extent_y = d3.extent(d3.values(visualization.map(d => d.y)))
+
+                functionPlot({
+                    title: 'Genetic code plot   y=f(x)',
+                    target: '.plot',
+                    width: 800,
+                    height: 400,
+                    disableZoom: true,
+                    xAxis: {
+                        label: 'x - axis',
+                        domain: extent_x
+                    },
+                    yAxis: {
+                        label: 'y - axis',
+                        domain: extent_y
+                    },
+                    data: [{
+                        points: plotData,
+                        fnType: 'points',
+                        graphType: 'polyline'
+                    }]
+                });
+                //console.log(`visualization: ${JSON.stringify(visualization)}`);
             })
         })
     </script>
