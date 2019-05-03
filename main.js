@@ -76,6 +76,7 @@ io.on('connection', function (socket) {
             };
         });
         socket.emit('Executed', output);
+        console.log(`Returned request for data execution`);
     });
 
     socket.on('disconnect', () => { console.log(`Client disconnected: ${replyFrom}`); socketlist.splice(socketlist.indexOf(socket), 1); });
