@@ -10,17 +10,14 @@ const file = require('./file');
 const console_log = console.log.bind(console);
 console.log = msg => console_log(`[${GLOBAL_CONFIG.FUNCTIONS.timestamp(null, "YYYY-MM-DD HH:mm:ss.SSS")}]: `, msg);
 
-
+const path = require('path');
 var express = require('express');
 var app = express();
 var http = new (require('http').Server)(app);
 var io = require('socket.io')(http);
 
+app.use('/', express.static(path.join(__dirname, '/web')))
 
-
-app.get('/', function (req, res) { // Load the page on connection
-    res.sendFile(__dirname + '/index.html');
-});
 
 
 var raw_genetic_code;
