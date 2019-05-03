@@ -17,20 +17,36 @@
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
     </script>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
+
+
     <script src="https://unpkg.com/d3@3/d3.min.js"></script>
     <script src="https://unpkg.com/function-plot@1/dist/function-plot.js"></script>
+
+    <script src="https://d3js.org/d3-array.v2.min.js"></script>
+    <script src="https://d3js.org/d3-color.v1.min.js"></script>
+    <script src="https://d3js.org/d3-format.v1.min.js"></script>
+    <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+    <script src="https://d3js.org/d3-time.v1.min.js"></script>
+    <script src="https://d3js.org/d3-time-format.v2.min.js"></script>
+    <script src="https://d3js.org/d3-scale.v3.min.js"></script>
 </head>
 
 <body>
 
-    <div class="input">
+
+    <div class="btn-group" role="group" aria-label="Input" style="margin: 5px;">
         <button type="button" class="btn btn-primary"
-            onclick="socket.emit('generateNewGene', {inputs:1, outputs: 1})">Generate</button>
+            onclick="socket.emit('generateNewGene_1', {inputs:1, outputs: 1})">Generate 1:1</button>
+        <button type="button" class="btn btn-primary"
+            onclick="socket.emit('generateNewGene_2', {inputs:2, outputs: 1})">Generate 2:1</button>
     </div>
 
 
     <div class="col-sm-12">
-        <div class="plot"></div>
+        <div class="plot">
+            <div class="A"></div>
+        </div>
     </div>
 
     <div class="raw col-sm-12">
