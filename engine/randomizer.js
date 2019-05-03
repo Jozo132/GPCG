@@ -50,6 +50,64 @@ const randomExpression = (config, variables, level) => {
 const incrementCharactedName = c => { const same = (str, char) => { let i = str.length; while (i--) if (str[i] !== char) return false; return true; }; const nextLetter = l => l < 90 ? String.fromCharCode(l + 1) : 'A'; var u = c.toUpperCase(); if (same(u, 'Z')) { var txt = ''; var i = u.length; while (i--) txt += 'A'; return (txt + 'A'); } else { var p = ""; var q = ""; if (u.length > 1) { p = u.substring(0, u.length - 1); q = String.fromCharCode(p.slice(-1).charCodeAt(0)); } var l = u.slice(-1).charCodeAt(0); var z = nextLetter(l); return (z === 'A') ? (p.slice(0, -1) + nextLetter(q.slice(-1).charCodeAt(0)) + z).toLowerCase() : (p + z).toLowerCase(); } }
 
 
+const cleanUp = genetic_code => {
+    var cloned_genetic_code = JSON.parse(JSON.stringify(genetic_code));
+    var variables = [];
+    const typesToLookFor = ['const', 'var', 'let', 'assign', 'return'];
+
+    const searchOperation = (operation, lookFor, ignore, callback) => {
+        if (Array.isArray(operation.value)) operation.value.forEach(newOperation => searchOperation(newOperation, lookFor, ignore, callback));
+        else { if (lookFor.includes(operation.value) && !ignore.includes(operation.value)) callback(operation.value); }
+    }
+
+    const getUnusedVariables = (code, vars) => {
+        code.forEach(line => {
+            var thisType = line[0];
+            var lookingFor = [];
+            vars.forEach(v => lookingFor.push(v.name));
+            if (typesToLookFor.includes(thisType)) {
+                if (thisType === 'return') {
+                    var operation = line[1];
+                    operation.forEach(op => searchOperation(op, lookingFor, ['nothing'], usedVariable => { var x = vars.find(v => v.name === usedVariable); x.used++; }));
+                } else {
+                    var variableName = line[1];
+                    var operation = line[2];
+                    var ignoreVars = [variableName];
+                    if (thisType === 'assign') {
+                        operation.forEach(op => searchOperation(op, lookingFor, ignoreVars, usedVariable => { var x = vars.find(v => v.name === usedVariable); x.used++; }));
+                    } else {
+                        vars.push({ name: variableName, used: 0 });
+                        operation.forEach(op => searchOperation(op, lookingFor, ignoreVars, usedVariable => { var x = vars.find(v => v.name === usedVariable); x.used++; }));
+                    }
+                }
+            }
+        });
+
+        var unusedVariables = [];
+        vars.forEach(v => { if (v.used === 0) unusedVariables.push(v.name); });
+        if (unusedVariables.length > 0) console.log(`Unused: ${JSON.stringify(unusedVariables)}`);
+        return unusedVariables;
+    }
+
+    const removeVariables = (code, vars) => {
+        var linesToRemove = [];
+        code.forEach((line, i) => { var thisVariable = line[1]; if (vars.includes(thisVariable)) linesToRemove.unshift(i); });
+        linesToRemove.forEach(line => code.splice(line, 1));
+    }
+
+    for (var finished = false; !finished;) {
+        variables = [];
+        var unusedVariables = getUnusedVariables(cloned_genetic_code, variables);
+        if (unusedVariables.length > 0) {
+            removeVariables(cloned_genetic_code, unusedVariables);
+        } else {
+            finished = true;
+            console.log(`Genetic code cleanup finished!`);
+        }
+    }
+    return cloned_genetic_code;
+}
+
 
 
 
@@ -125,8 +183,8 @@ const create_random_genetic_code = (options, callback) => {
     genetic_code.push(stats);
     genetic_code.push(configuration);
     random_code.forEach(line => genetic_code.push(line));
-
-    callback(genetic_code);
+    var clean_genetic_code = cleanUp(genetic_code)
+    callback(clean_genetic_code);
 }
 
 const setConfig = config => {
@@ -142,5 +200,6 @@ module.exports = config => {
     var module = {};
     setConfig(config);
     module.generate = create_random_genetic_code;
+    module.cleanUp = cleanUp;
     return module;
 }
