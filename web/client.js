@@ -86,14 +86,19 @@ $(document).ready(() => {
         visualization = res;
         var plotData = [];
         res.forEach(packet => {
-            plotData.push([packet.a, packet.x])
+            var a = packet.a === Infinity || packet.a === -Infinity ? null : packet.a;
+            var x = packet.x === Infinity || packet.x === -Infinity ? null : packet.x;
+            a = a === null ? null : Number(a.toFixed(4));
+            x = x === null ? null : Number(x.toFixed(4));
+            plotData.push([a, x])
         })
 
         // @ts-ignore
         const extent_x = d3.extent(d3.values(visualization.map(d => d.a)))
         // @ts-ignore
-        const extent_y = d3.extent(d3.values(visualization.map(d => d.x)))
-
+        const extent_y = d3.extent(d3.values(visualization.map(d => Number((d.x).toFixed(4)))))
+        extent_y[0] -= 0.1
+        extent_y[1] += 0.1
 
         // @ts-ignore
         d3.select(".plot").selectAll("svg").remove()
@@ -212,7 +217,9 @@ $(document).ready(() => {
 
         var mouseover = d => tooltip.style("opacity", 1)
         var mouseleave = d => tooltip.style("opacity", 0)
-        var mousemove = d => {
+        var mousemove = d_ => {
+            console.log(d_);
+            var d = { a: 0, b: 0, x: 0 };
             tooltip.html(`"genetic_function(${d.a.toFixed(1)},${d.b.toFixed(1)}): ${d.x !== null ? d.x.toFixed(4) : null}`)
                 // @ts-ignore
                 .style("left", (d3.mouse(this)[0] + 70) + "px")
@@ -230,8 +237,34 @@ $(document).ready(() => {
             .attr("width", x.bandwidth())
             .attr("height", y.bandwidth())
             .style("fill", d => HEATMAP(d.x, extent_x))
+
+        svg.append('line')
+            .attr("x1", 0)
+            .attr("y1", height / 2)
+            .attr("x2", width)
+            .attr("y2", height / 2)
+            .attr("stroke-width", 1.5)
+            .attr("stroke", "grey")
+            .attr("pointer-events", "none");
+
+        svg.append("line")
+            .attr("x1", width / 2)
+            .attr("y1", 0)
+            .attr("x2", width / 2)
+            .attr("y2", height)
+            .attr("stroke-width", 1.5)
+            .attr("stroke", "grey")
+            .attr("pointer-events", "none");
+
+
+        svg.selectAll()
+            .append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", width)
+            .attr("height", height)
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)
-            .on("mouseleave", mouseleave)
+            .on("mouseleave", mouseleave);
     })
 })
