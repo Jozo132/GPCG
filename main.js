@@ -17,9 +17,23 @@ var io = require('socket.io')(http);
 
 app.use('/', express.static(path.join(__dirname, '/web')))
 
-var raw_genetic_code;
-var compiled_genetic_code;
-var executable_code = function (x) { return 0; };
+var executable_code;
+
+
+/** Generate new random genetic code
+ * @param {{ save: boolean; maxSize: number; maxDepth: number; inputs: string[]; outputs: string[]; }} config
+ * @param {{ (genetic_code: Array[], compiled_code: Array, executed_code: Function): void; }} callback
+ */
+const generateNewGeneticCode = (config, callback) => {
+    randomizer.generate(config, genetic_code => {  // Generate random genetic code, based on configuration input
+        compiler.compile(genetic_code, (compiled_code, path) => {  // Compile generated genetic code
+            if (config.save)  // Save and execute compiled genetic code and return everything
+                file.saveAndExecute(compiled_code, path, executed_code => callback(genetic_code, compiled_code, executed_code));
+            else  // Only execute compiled genetic code and return everything
+                file.execute(compiled_code, executed_code => callback(genetic_code, compiled_code, executed_code));
+        });
+    });
+};
 
 var socketlist = [];
 io.on('connection', function (socket) {
@@ -30,70 +44,47 @@ io.on('connection', function (socket) {
 
     socket.on('generateNewGene_1', message => {
         console.log(`generateNewGene_1: ${message}`);
-
         var randomConfig = {
+            save: false,
             maxSize: 10,
             maxDepth: 6,
             inputs: ['number'],
             outputs: ['number']
         };
-
-        randomizer.generate(randomConfig, random_gene => {  // Generate random genetic code, based on configuration input
-            raw_genetic_code = random_gene;  // Save genetic code in global variable for later
-
-            compiler.compile(random_gene, (compiled_code, path) => {  // Compile generated genetic code
-                compiled_genetic_code = compiled_code;  // Save compiled code in global variable for later
-
-                //file.execute(compiled_code, /*path,*/ code => {  // Execute compiled genetic code
-                file.saveAndExecute(compiled_code, path, code => {  // Save and execute compiled genetic code
-                    executable_code = code;  // Save executable function in global variable for later
-
-                    socket.emit('Generated_1', {  // Return genetic and compiled code for display on HTML page over Socket.IO
-                        gene: raw_genetic_code,
-                        code: compiled_genetic_code
-                    });
-                });
+        generateNewGeneticCode(randomConfig, (genetic_code, compiled_code, executed_code) => {
+            executable_code = executed_code;
+            socket.emit('Generated_1', {  // Return genetic and compiled code for display on HTML page over Socket.IO
+                gene: genetic_code,
+                code: compiled_code
             });
         });
-
     });
 
     socket.on('generateNewGene_2', message => {
         console.log(`generateNewGene_2: ${message}`);
-
         var randomConfig = {
+            save: false,
             maxSize: 10,
             maxDepth: 6,
             inputs: ['number', 'number'],
             outputs: ['number']
         };
-
-        randomizer.generate(randomConfig, random_gene => {  // Generate random genetic code, based on configuration input
-            raw_genetic_code = random_gene;  // Save genetic code in global variable for later
-
-            compiler.compile(random_gene, (compiled_code, path) => {  // Compile generated genetic code
-                compiled_genetic_code = compiled_code;  // Save compiled code in global variable for later
-
-                file.execute(compiled_code, /*path,*/ code => {  // Execute compiled genetic code
-                    executable_code = code;  // Save executable function in global variable for later
-
-                    socket.emit('Generated_2', {  // Return genetic and compiled code for display on HTML page over Socket.IO
-                        gene: raw_genetic_code,
-                        code: compiled_genetic_code
-                    });
-                });
+        generateNewGeneticCode(randomConfig, (genetic_code, compiled_code, executed_code) => {
+            executable_code = executed_code;
+            socket.emit('Generated_2', {  // Return genetic and compiled code for display on HTML page over Socket.IO
+                gene: genetic_code,
+                code: compiled_code
             });
         });
-
     });
 
     socket.on('requestExecution_1', message => {
         var output = [];
         message.forEach((element, i) => {
-            let executed = executable_code(element.a)
+            let result = executable_code(element.a)
             output[i] = {
                 a: element.a,
-                x: executed[0]
+                x: result[0]
             };
         });
         socket.emit('Plot_1', output);
@@ -103,11 +94,11 @@ io.on('connection', function (socket) {
     socket.on('requestExecution_2', message => {
         var output = [];
         message.forEach((element, i) => {
-            let executed = executable_code([element.a, element.b])
+            let result = executable_code([element.a, element.b])
             output[i] = {
                 a: element.a,
                 b: element.b,
-                x: executed[0]
+                x: result[0]
             };
         });
         socket.emit('Plot_2', output);
