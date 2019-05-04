@@ -30,8 +30,8 @@ const HEATMAP = (x, domain) => {
 
     // @ts-ignore
     var red_white = d3.scaleLinear()
-        .range(["#FFFF00", "#FFFFFF"])
-        .domain([getExtent(3), getExtent(4)])
+        .range(["#FF0000", "#FFFFFF"])
+        .domain([getExtent(4), getExtent(5)])
     if (x === null) return "#000000";
     if (x <= getExtent(1)) return blue_cyan(x);
     if (x <= getExtent(2)) return cyan_green(x);
