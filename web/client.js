@@ -94,9 +94,9 @@ $(document).ready(() => {
         })
 
         // @ts-ignore
-        const extent_x = d3.extent(d3.values(visualization.map(d => d.a)))
+        const extent_x = d3.extent(d3.values(visualization.map(d => d.a === null ? null : d.a)))
         // @ts-ignore
-        const extent_y = d3.extent(d3.values(visualization.map(d => Number((d.x).toFixed(4)))))
+        const extent_y = d3.extent(d3.values(visualization.map(d => d.x === null ? null : Number((d.x).toFixed(4)))))
         extent_y[0] -= 0.1
         extent_y[1] += 0.1
 
