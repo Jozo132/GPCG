@@ -129,15 +129,40 @@ node main.js
 The code starts a local HTTP server which interfaces with the running code for visual feedback.
 
 
+===============
 #### Compiling a manually written genetic code example
-
 <img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/571751346026446856/2019-04-27_19_34_42-_README.md_-_GPCG_-_Visual_Studio_Code.png"/>
 
+===============
 #### Compiled randomly generated genetic code
-
 <img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/573450845426024448/2019-05-02_12_03_38-Window.png"/>
 
 
-#### HTML Web interface with 2D plot
-
+===============
+#### HTML Web interface with 2D plot (1)
 <img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/573797849515687936/2019-05-03_11_04_55-.png"/>
+
+
+===============
+#### HTML Web interface with 2D plot (2)
+<img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/574223961273925632/2019-05-04_15_15_00-Window.png"/>
+
+
+===============
+#### HTML Web interface with 2D render (1)
+<img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/574223981096337419/2019-05-04_15_18_30-Window.png"/>
+
+
+===============
+#### HTML Web interface with 2D render (2)
+<img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/574223931355955202/2019-05-04_14_50_46-Window.png"/>
+
+
+===============
+#### HTML Web interface with 2D render (3)
+<img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/573928318131240980/2019-05-03_19_41_38-.png"/>
+
+
+===============
+#### HTML Web interface with 2D render (4)
+<img align="left" src="https://cdn.discordapp.com/attachments/421762597587648514/573928331821711382/2019-05-03_19_36_23-GPCG_Web_Interface.png"/>
