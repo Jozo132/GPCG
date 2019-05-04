@@ -45,7 +45,7 @@ io.on('connection', function (socket) {
                 compiled_genetic_code = compiled_code;  // Save compiled code in global variable for later
 
                 //file.execute(compiled_code, /*path,*/ code => {  // Execute compiled genetic code
-                file.saveAndExecute(compiled_code, path, code => {  // Execute compiled genetic code
+                file.saveAndExecute(compiled_code, path, code => {  // Save and execute compiled genetic code
                     executable_code = code;  // Save executable function in global variable for later
 
                     socket.emit('Generated_1', {  // Return genetic and compiled code for display on HTML page over Socket.IO
