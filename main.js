@@ -32,8 +32,8 @@ io.on('connection', function (socket) {
         console.log(`generateNewGene_1: ${message}`);
 
         var randomConfig = {
-            size: 10,
-            maxDepth: 3,
+            maxSize: 10,
+            maxDepth: 6,
             inputs: ['number'],
             outputs: ['number']
         };
@@ -62,8 +62,8 @@ io.on('connection', function (socket) {
         console.log(`generateNewGene_2: ${message}`);
 
         var randomConfig = {
-            size: 10,
-            maxDepth: 3,
+            maxSize: 10,
+            maxDepth: 6,
             inputs: ['number', 'number'],
             outputs: ['number']
         };
@@ -130,8 +130,8 @@ http.listen(8080, () => console.log("HTTP server online: http://localhost:8080")
 // #### MANUAL TEST ####
 const test = () => {
     const randomConfig = {
-        size: 10,
-        maxDepth: 3,
+        maxSize: 10,
+        maxDepth: 6,
         inputs: ['number'],
         outputs: ['number']
     }
