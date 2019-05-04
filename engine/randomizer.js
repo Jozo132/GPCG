@@ -52,7 +52,6 @@ const incrementCharactedName = c => { const same = (str, char) => { let i = str.
 
 const cleanUp = genetic_code => {
     var cloned_genetic_code = JSON.parse(JSON.stringify(genetic_code));
-    var variables = [];
     const typesToLookFor = ['const', 'var', 'let', 'assign', 'return'];
 
     const searchOperation = (operation, lookFor, ignore, callback) => {
@@ -60,49 +59,42 @@ const cleanUp = genetic_code => {
         else { if (lookFor.includes(operation.value) && !ignore.includes(operation.value)) callback(operation.value); }
     }
 
-    const getUnusedVariables = (code, vars) => {
-        code.forEach(line => {
+    const removeLines = (code, lines) => { let lines_ = lines.sort((a, b) => b - a); lines_.forEach(line => code.splice(line, 1)); }
+
+    const getUnusedLinesOfCode = code => {
+        var allUsedVariables = [];
+        code.forEach((line, index) => {
             var thisType = line[0];
-            var lookingFor = [];
-            vars.forEach(v => lookingFor.push(v.name));
-            if (typesToLookFor.includes(thisType)) {
-                if (thisType === 'return') {
-                    var operation = line[1];
-                    operation.forEach(op => searchOperation(op, lookingFor, ['nothing'], usedVariable => { var x = vars.find(v => v.name === usedVariable); x.used++; }));
-                } else {
-                    var variableName = line[1];
-                    var operation = line[2];
-                    var ignoreVars = [variableName];
-                    if (thisType === 'assign') {
-                        operation.forEach(op => searchOperation(op, lookingFor, ignoreVars, usedVariable => { var x = vars.find(v => v.name === usedVariable); x.used++; }));
-                    } else {
-                        vars.push({ name: variableName, used: 0 });
-                        operation.forEach(op => searchOperation(op, lookingFor, ignoreVars, usedVariable => { var x = vars.find(v => v.name === usedVariable); x.used++; }));
-                    }
-                }
+            if (typesToLookFor.includes(thisType) && thisType !== 'return') {
+                var variableName = line[1];
+                allUsedVariables.push({ index: index, name: variableName, used: 0 });
             }
         });
 
-        var unusedVariables = [];
-        vars.forEach(v => { if (v.used === 0) unusedVariables.push(v.name); });
-        if (unusedVariables.length > 0) console.log(`Unused: ${JSON.stringify(unusedVariables)}`);
-        return unusedVariables;
+        allUsedVariables.forEach(X => {
+            for (var line = X.index; line < code.length; line++) {
+                var lookFor = [X.name]
+                var lineType = code[line][0];
+                var operation = lineType === 'return' ? code[line][1] : code[line][2]
+                operation.forEach(op => searchOperation(op, lookFor, [], usedVar => { if (X.name === usedVar) X.used++; }));
+            }
+        });
+        var allUnusedVariables = [];
+        allUsedVariables.forEach(x => {
+            if (x.used === 0) allUnusedVariables.push(x.index);
+        })
+        console.log(`All: ${JSON.stringify(allUsedVariables)}`);
+        return allUnusedVariables;
     }
 
-    const removeVariables = (code, vars) => {
-        var linesToRemove = [];
-        code.forEach((line, i) => { var thisVariable = line[1]; if (vars.includes(thisVariable)) linesToRemove.unshift(i); });
-        linesToRemove.forEach(line => code.splice(line, 1));
-    }
 
     for (var finished = false; !finished;) {
-        variables = [];
-        var unusedVariables = getUnusedVariables(cloned_genetic_code, variables);
-        if (unusedVariables.length > 0) {
-            removeVariables(cloned_genetic_code, unusedVariables);
+        var unusedLines = getUnusedLinesOfCode(cloned_genetic_code);
+        if (unusedLines.length > 0) {
+            removeLines(cloned_genetic_code, unusedLines);
         } else {
             finished = true;
-            console.log(`Genetic code cleanup finished!`);
+            console.log(`Cleanup finised!`);
         }
     }
     return cloned_genetic_code;
