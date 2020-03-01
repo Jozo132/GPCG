@@ -8,7 +8,7 @@ I'm not a specialits nor did I do any extensive research on GA (Genetic Algorith
 
 Whatever you read here, I am writing this from scratch. This means a lot of worngly used references and words will be used. I'll still try.
 
-I'm unsure if the proposed code generation algorhitm exists, so I've already started working on it my own way.
+I'm unsure if the proposed code generation algorithm exists, so I've already started working on it my own way.
 There is a [video](https://www.youtube.com/watch?v=G_dpBsu2Y4Q) online of something similar written in Python, but it was limited only to a few functions.
 
 Personally, I've not found any examples of AI being programmed this way.
@@ -24,10 +24,10 @@ If the function is useful and not yet implemented anywhere, it will be saved in 
 
 Here is where it gets spooky.
 Example:
-Let's say we train an algorhitm code with this Genetic Programmer to play Game_A.
+Let's say we train an algorithm code with this Genetic Programmer to play Game_A.
 It should suck at playing in the beginning and only slowly get better.
 Having the code running for (let's say) 8 hours it only gets about half decent results.
-But having it running for so long, our algorhitm will have made some well trained function models in the global 'brain'.
+But having it running for so long, our algorithm will have made some well trained function models in the global 'brain'.
 Then let's say we start a new project to train playing a similar but different game Game_B.
 This time it would aswell suck at the beginning, but it will grasp on what to do faster, because the global brain has 'experience' from previous runs.
 Having the code running for (let's say) 1 hour it gets just as good as the other code last time, despite it being a different game, but with some slight similarities.
