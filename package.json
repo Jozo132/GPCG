@@ -1,0 +1,27 @@
+{
+  "name": "gpcg",
+  "version": "1.0.0",
+  "description": "Genetic Programming - Code Generation ===============",
+  "main": "main.js",
+  "scripts": {
+    "test": "node main"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jozo132/GPCG.git"
+  },
+  "author": "J.Vovk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jozo132/GPCG/issues"
+  },
+  "homepage": "https://github.com/Jozo132/GPCG#readme",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "express": "^4.17.1",
+    "mkdirp": "^1.0.3",
+    "moment": "^2.24.0",
+    "require-from-string": "^2.0.2",
+    "socket.io": "^2.3.0"
+  }
+}

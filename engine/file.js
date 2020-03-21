@@ -8,6 +8,7 @@ const requireFromString = require('require-from-string');
 
 const saveFile = (file, data, callback) => {
     console.log(`Saving file '${file}' ...`);
+    // @ts-ignore
     mkdirp(file.substr(0, file.lastIndexOf("/")), e => {
         if (e) console.log(e);
         fs.writeFile(file, data, callback);
